@@ -1,1 +1,5 @@
 node_modules
+nightly-build-files
+types
+es
+cjs

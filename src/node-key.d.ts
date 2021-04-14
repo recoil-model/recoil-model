@@ -20,35 +20,6 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-import {
-  GetRecoilValue,
-  RecoilValue,
-  SerializableParam,
-} from 'recoil';
-import { BaseSchema } from 'yup';
-import { ModelFieldFamily } from './model-family';
 
 
-
-export declare const fieldFamilyYup: {
-  <T, P extends SerializableParam>(
-    props: {
-      schemas?: BaseSchema<any, any, any>;
-    } & (
-        | {
-          default:
-          | RecoilValue<T>
-          | Promise<T>
-          | T
-          | ((param: P) => T | RecoilValue<T> | Promise<T>);
-        }
-        | {
-          defaultGet: (
-            param: P,
-          ) => (opts: {
-            get: GetRecoilValue;
-          }) => Promise<T> | RecoilValue<T> | T;
-        }
-      ),
-  ): ModelFieldFamily<T, P>;
-};
+export type NodeKey = string;

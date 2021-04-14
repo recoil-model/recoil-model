@@ -26,7 +26,7 @@ import {
   SerializableParam,
 } from 'recoil';
 import { BaseSchema } from 'yup';
-import { ModelFieldFamily } from './model';
+import { ModelFieldFamily } from './model-family';
 
 
 

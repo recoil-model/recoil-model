@@ -26,16 +26,12 @@ import {
   CallbackInterface,
   Loadable,
   RecoilValueReadOnly,
-  SerializableParam,
 } from 'recoil';
 
 import { ReactElement } from 'react';
+import { ValidateInfo } from './validate-info';
+import { NodeKey } from './node-key';
 
-export type ValidateInfo = {
-  error: boolean;
-  message: string | null;
-  messages: string[];
-};
 type RecoilFieldComponentProps<T> = {
   value: T;
   setValue: (v: T) => void;
@@ -45,7 +41,6 @@ type RecoilFieldProps<T> = {
   valueRecoilState: RecoilState<T>;
   validateRecoilState: RecoilValue<ValidateInfo>;
 };
-type NodeKey = string;
 type RecoilFieldC = <T>(props: RecoilFieldProps<T>) => ReactElement<T, any>;
 
 
