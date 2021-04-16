@@ -25,7 +25,7 @@ import {
   RecoilValue,
 } from 'recoil';
 import { BaseSchema } from 'yup';
-import { ModelField } from './model';
+import { ModelFieldBuild } from './model';
 
 export declare const fieldYup: {
   <T>(
@@ -41,5 +41,5 @@ export declare const fieldYup: {
           }) => Promise<T> | RecoilValue<T> | T;
         }
       ),
-  ): ModelField<T>;
+  ): ModelFieldBuild<T>;
 };

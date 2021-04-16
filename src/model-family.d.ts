@@ -21,58 +21,32 @@
  *   SOFTWARE.
  */
 
-import { RecoilState, SerializableParam } from "recoil";
-import { RecoilValue } from "recoil";
-import { RecoilValueReadOnly } from "recoil";
-import { ModelFields, ModelFieldsReturn } from "./model";
-import { NodeKey } from "./node-key";
-import { ValidateInfo } from "./validate-info";
 
-
-
-export interface ModelFieldReturnFamily<T, P extends SerializableParam> {
-  validate: RecoilValueReadOnly<ValidateInfo>;
-  value: RecoilState<T>;
+import { RecoilState, RecoilValue } from "recoil"
+import { RecoilValueReadOnly } from "recoil"
+import { NodeKey } from "./node-key"
+import { ValidateInfo } from './validate-info';
+export type ModelFamilyField<T, P extends SerializableParam> = {
+  validate: (param: P) => RecoilValueReadOnly<ValidateInfo>;
+  value: (param: P) => RecoilState<T>;
 }
-export interface ModelFieldFamily<T, P extends SerializableParam> {
-  (key: NodeKey): ModelFieldReturnFamily<T, P>;
-  _$ModelField: true;
+export type ModelFamilyFieldBuild<T, P extends SerializableParam> = {
+  (): ModelFamilyField<T, P>
+  _$ModelField: true
+}
+export type ModelFamilyFields<T, P extends SerializableParam> = {
+  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyFieldBuild<T[k], P>
+}
+export type ModelFamilyFieldsReturn<T, P extends SerializableParam> = {
+  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyField<T[k], P>
 }
 
-type ModelFieldsFamily<T, P extends SerializableParam> = {
-  [K in keyof T]?: T[K] extends ModelFieldFamily<any, P>
-  ? T[K]
-  : ModelFields<T[K]>;
-};
-
-type ModelFieldsReturnFamily<T, P extends SerializableParam> = {
-  [K in keyof T]: T[K] extends ModelReturnFamily<any, any>
-  ? T[K]['fields']
-  : T[K] extends ModelFieldFamily<infer Y, P>
-  ? {
-    validate: (p: P) => RecoilValueReadOnly<ValidateInfo>;
-    value: (p: P) => RecoilState<Y>;
-  }
-  : ModelFieldsReturn<T[K]>;
-};
-
-type ModelValueReturnFamily<T, P extends SerializableParam> = {
-  [K in keyof T]: T[K] extends ModelReturnFamily<any, any>
-  ? T[K]['value']
-  : T[K] extends ModelFieldFamily<infer Y, P>
-  ? Y
-  : ModelFieldsReturn<T[K]>;
-};
-type ModelReturnFamily<T, P extends SerializableParam> = {
-  fields: ModelFieldsReturnFamily<T, P>;
-  validate: (p: P) => RecoilValueReadOnly<ValidateInfo>;
-  value: (p: P) => RecoilValue<ModelValueReturnFamily<T, P>>;
+type ModelFamilyReturn<T, P extends SerializableParam> = {
+  fields: ModelFamilyFieldsReturn<T, P>;
+  validate: (param: P) => RecoilValueReadOnly<ValidateInfo>;
+  value: (param: P) => RecoilState<T>;
   __$model: true;
 };
-
 export declare const modelFamily: {
-  <T, P extends SerializableParam>(props: {
-    fields: ModelFieldsFamily<T, P>;
-    key: NodeKey;
-  }): ModelReturnFamily<T, P>;
+  <T, P extends SerializableParam>(props: { fields: ModelFamilyFields<T, P>; key: NodeKey }): ModelFamilyReturn<T, P>;
 };

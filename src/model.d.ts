@@ -20,130 +20,39 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-import {
-  RecoilState,
-  RecoilValue,
-  CallbackInterface,
-  Loadable,
-  RecoilValueReadOnly,
-} from 'recoil';
 
-import { ReactElement } from 'react';
+
+import { RecoilState, RecoilValue } from "recoil"
+import { RecoilValueReadOnly } from "recoil"
+import { NodeKey } from "./node-key"
 import { ValidateInfo } from './validate-info';
-import { NodeKey } from './node-key';
-
-type RecoilFieldComponentProps<T> = {
-  value: T;
-  setValue: (v: T) => void;
-} & ValidateInfo;
-type RecoilFieldProps<T> = {
-  component: (props: RecoilFieldComponentProps<T>) => ReactElement<T, any>;
-  valueRecoilState: RecoilState<T>;
-  validateRecoilState: RecoilValue<ValidateInfo>;
-};
-type RecoilFieldC = <T>(props: RecoilFieldProps<T>) => ReactElement<T, any>;
-
-
-export type Collection<T> = {
-  rowCount: number;
-  offset: number;
-  limit: number;
-  rows: T[];
-};
-type RecoilComboFieldComponentProps<
-  T,
-  TRequestFn extends { (...args: any[]): any }
-  > = {
-    value: T;
-    setValue: (v: T) => void;
-    collection: Loadable<Collection<T>>;
-    request: TRequestFn;
-  } & ValidateInfo;
-type RecoilComboFieldProps<T, TRequestFn extends { (...args: any[]): any }> = {
-  component: (
-    props: RecoilComboFieldComponentProps<T, TRequestFn>,
-  ) => ReactElement<T, any>;
-  collectionRecoilValue: RecoilValue<Collection<T>>;
-  requestCallback: (callbackInterface: CallbackInterface) => TRequestFn;
-  valueRecoilState: RecoilState<T>;
-  validateRecoilState: RecoilValue<ValidateInfo>;
-};
-
-type RecoilComboFieldC = <T, TRequestFn extends { (...args: any[]): any }>(
-  props: RecoilComboFieldProps<T, TRequestFn>,
-) => ReactElement<T, any>;
-
-
-type RecoilCollectionComponentProps<
-  T,
-  TRequestFn extends { (...args: any[]): any }
-  > = {
-    collection: Loadable<Collection<T>>;
-    request: TRequestFn;
-  };
-type RecoilCollectionProps<T, TRequestFn extends { (...args: any[]): any }> = {
-  component: (
-    props: RecoilCollectionComponentProps<T, TRequestFn>,
-  ) => ReactElement<T, any>;
-  collectionRecoilValue: RecoilValue<Collection<T>>;
-  requestCallback: (callbackInterface: CallbackInterface) => TRequestFn;
-};
-
-type RecoilCollectionC = <T, TRequestFn extends { (...args: any[]): any }>(
-  props: RecoilCollectionProps<T, TRequestFn>,
-) => ReactElement<T, any>;
-
-type RecoilValueFieldComponentProps<T> = {
-  value: T;
-  setValue: (v: T) => void;
-};
-type RecoilValueFieldProps<T> = {
-  component: (props: RecoilValueFieldComponentProps<T>) => ReactElement<T, any>;
-  valueRecoilState: RecoilState<T>;
-};
-
-type RecoilValueFieldC = <T>(
-  props: RecoilValueFieldProps<T>,
-) => ReactElement<T, any>;
-
-
-export interface ModelFieldReturn<T> {
+export type ModelField<T> = {
   validate: RecoilValueReadOnly<ValidateInfo>;
   value: RecoilState<T>;
 }
-export interface ModelField<T> {
-  (key: NodeKey): ModelFieldReturn<T>;
-  _$ModelField: true;
+export type ModelFieldBuild<T> = {
+  (): ModelField<T>
+  _$ModelField: true
 }
-type ModelFields<T> = {
-  [K in keyof T]?: T[K] extends ModelField<any> ? T[K] : ModelFields<T[K]>;
-};
-
-type ModelFieldsReturn<T> = {
-  [K in keyof T]: T[K] extends ModelReturn<any>
-  ? T[K]['fields']
-  : T[K] extends ModelField<infer Y>
-  ? {
-    validate: RecoilValueReadOnly<ValidateInfo>;
-    value: RecoilState<Y>;
-  }
-  : ModelFieldsReturn<T[K]>;
-};
-
-type ModelValueReturn<T> = {
-  [K in keyof T]: T[K] extends ModelField<infer Y>
-  ? Y
-  : T[K] extends ModelReturn<any>
-  ? T[K]['value']
-  : ModelValueReturn<T[K]>;
-};
+export type ModelFields<T> = {
+  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFields<T[k]> : ModelFieldBuild<T[k]>
+}
+export type ModelFieldsReturn<T> = {
+  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFields<T[k]> : ModelField<T[k]>
+}
 
 type ModelReturn<T> = {
   fields: ModelFieldsReturn<T>;
   validate: RecoilValueReadOnly<ValidateInfo>;
-  value: RecoilValue<ModelValueReturn<T>>;
-  __$model: true;
+  value: RecoilState<T>;
+  __$model: true
 };
+export type ModelFn = {
+  <T>(fields: ModelFields<T>): ModelFields<T>
+}
+export type ModelFieldBuildFn = {
+  <T>(value: T): ModelFieldBuild<T>
+}
 export declare const model: {
   <T>(props: { fields: ModelFields<T>; key: NodeKey }): ModelReturn<T>;
 };
