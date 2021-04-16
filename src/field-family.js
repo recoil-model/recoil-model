@@ -20,9 +20,43 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-export { model } from './model';
-export { fieldYup } from './yup';
-export { fieldFamilyYup } from './yup-family';
-export { field } from './field';
-export { fieldFamily } from './field-family';
-export { modelFamily } from './model-family';
+
+import recoil from 'recoil';
+
+export const fieldFamily = ({ default: $default, defaultGet }) => {
+  const f = (key, nodeField) => {
+    let value;
+    if (defaultGet) {
+      $default = recoil.selectorFamily({
+        key: [key, '$value', '$default'].join('-'),
+        get: defaultGet,
+      });
+      value = recoil.atomFamily({
+        key: [key, '$value'].join('-'),
+        default: $default,
+      });
+    } else {
+      value = recoil.atomFamily({
+        key: [key, '$value'].join('-'),
+        default: $default,
+      });
+    }
+    return {
+      validate: recoil.selectorFamily({
+        key: [key, '$validate'].join('-'),
+        get: params => ({ get }) => {
+          const v = get(value(params));
+          return {
+            path: nodeField.join('.'),
+            error: false,
+            message: null,
+            messages: [],
+          };
+        },
+      }),
+      value,
+    };
+  };
+  f._$ModelField = true;
+  return f;
+};

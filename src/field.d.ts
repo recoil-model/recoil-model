@@ -20,9 +20,24 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-export { model } from './model';
-export { fieldYup } from './yup';
-export { fieldFamilyYup } from './yup-family';
-export { field } from './field';
-export { fieldFamily } from './field-family';
-export { modelFamily } from './model-family';
+import {
+  GetRecoilValue,
+  RecoilValue,
+} from 'recoil';
+import { BaseSchema } from 'yup';
+import { ModelFieldBuild } from './model';
+
+export declare const field: {
+  <T>(
+    props: (
+      | {
+        default: RecoilValue<T> | Promise<T> | T;
+      }
+      | {
+        defaultGet: (opts: {
+          get: GetRecoilValue;
+        }) => Promise<T> | RecoilValue<T> | T;
+      }
+    ),
+  ): ModelFieldBuild<T>;
+};

@@ -35,10 +35,14 @@ export type ModelFamilyFieldBuild<T, P extends SerializableParam> = {
   _$ModelField: true
 }
 export type ModelFamilyFields<T, P extends SerializableParam> = {
-  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyFieldBuild<T[k], P>
+  [k in keyof T]:
+  T[k] extends any[] ? ModelFamilyFieldBuild<T[k]> :
+  T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyFieldBuild<T[k], P>
 }
 export type ModelFamilyFieldsReturn<T, P extends SerializableParam> = {
-  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyField<T[k], P>
+  [k in keyof T]:
+  T[k] extends any[] ? ModelFamilyField<T[k]> :
+  T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyField<T[k], P>
 }
 
 type ModelFamilyReturn<T, P extends SerializableParam> = {

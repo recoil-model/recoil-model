@@ -35,10 +35,15 @@ export type ModelFieldBuild<T> = {
   _$ModelField: true
 }
 export type ModelFields<T> = {
-  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFields<T[k]> : ModelFieldBuild<T[k]>
+  [k in keyof T]:
+
+  T[k] extends any[] ? ModelFieldBuild<T[k]> :
+  T[k] extends { [key: string]: any } ? ModelFields<T[k]> : ModelFieldBuild<T[k]>
 }
 export type ModelFieldsReturn<T> = {
-  [k in keyof T]: T[k] extends { [key: string]: any } ? ModelFields<T[k]> : ModelField<T[k]>
+  [k in keyof T]:
+  T[k] extends any[] ? ModelField<T[k]> :
+  T[k] extends { [key: string]: any } ? ModelFields<T[k]> : ModelField<T[k]>
 }
 
 type ModelReturn<T> = {
