@@ -14,7 +14,7 @@
     "native",
     "umd"
   ],
-  "repository": "https://github.com/ericfillipe1/recoil-model.git",
+  "repository": "https://github.com/recoil-model/recoil-model.git",
   "license": "MIT",
   "scripts": {
     "prepare": "install-peers",
