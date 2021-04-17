@@ -23,7 +23,10 @@
 
 import recoil from 'recoil';
 
-export const field = ({ default: $default, defaultGet }) => {
+export const field = ({ default: $default, validate: $validate, defaultGet }) => {
+  let validate = $validate ?? (() => {
+    return validateValue.ok;
+  })
   const f = (key, nodeField) => {
     let value;
     if (defaultGet) {
@@ -44,15 +47,7 @@ export const field = ({ default: $default, defaultGet }) => {
     return {
       validate: recoil.selector({
         key: [key, '$validate'].join('-'),
-        get: ({ get }) => {
-          const v = get(value);
-          return {
-            path: nodeField.join('.'),
-            error: false,
-            message: null,
-            messages: [],
-          };
-        },
+        get: validate,
       }),
       value,
     };

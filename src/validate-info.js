@@ -20,32 +20,59 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-import {
-  GetRecoilValue,
-  RecoilValue,
-} from 'recoil';
-import { BaseSchema } from 'yup';
-import { ModelFieldBuild } from './model';
-import { ValidateInfo } from './validate-info';
 
-export declare const field: {
-  <T>(
-    props: (
-      {
+const errorFields = (obj) => {
+  let fields = {}
+  let array = [];
+  for (const key in obj) {
+    let element = obj[key]
+    if (element && element._$ValidateInfo) {
+      fields[key] = element
+      array.push(fields[key]);
+    }
+    else {
+      const { fields: fieldsA, array: arrayA } = errorFields(element)
+      fields[key] = fieldsA;
+      array = [array, ...arrayA]
+    }
+  }
+  return { fields: fields, array };
+}
+const ok = {
+  error: false,
+  message: null,
+  messages: [],
+  _$ValidateInfo: true
+}
 
-
-        validate: (opts: {
-          get: GetRecoilValue;
-        }) => Promise<ValidateInfo> | RecoilValue<ValidateInfo> | ValidateInfo;
-      }
-      | {
-        default: RecoilValue<T> | Promise<T> | T;
-      }
-      | {
-        defaultGet: (opts: {
-          get: GetRecoilValue;
-        }) => Promise<T> | RecoilValue<T> | T;
-      }
-    ),
-  ): ModelFieldBuild<T>;
+const fields = (...msgs) => {
+  const { fields, array } = errorFields(msgs[0]);
+  const erros = array.filter(e => e.error)
+  if (erros.length == 0) {
+    return {
+      ...ok,
+      fields
+    }
+  }
+  return ({
+    fields,
+    error: true,
+    message: erros.map(e => e.message).join('\n'),
+    messages: erros.map(e => e.message),
+    _$ValidateInfo: true
+  })
 };
+
+const error = (...msgs) => {
+  return ({
+    error: true,
+    message: msgs.join(''),
+    messages: msgs,
+    _$ValidateInfo: true
+  })
+};
+export const validateInfo = {
+  fields,
+  error,
+  ok
+}

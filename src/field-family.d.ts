@@ -26,12 +26,19 @@ import {
   SerializableParam,
 } from 'recoil';
 import { BaseSchema } from 'yup';
+import { ValidateInfo } from '../nightly-build-files/types/model';
 import { ModelFamilyFieldBuild } from './model-family';
 
 export declare const fieldFamily: {
   <T, P extends SerializableParam>(
     props: (
-      | {
+      {
+        validate?: (
+          param: P,
+        ) => (opts: {
+          get: GetRecoilValue;
+        }) => Promise<ValidateInfo> | RecoilValue<ValidateInfo> | ValidateInfo;
+      } | {
         default:
         | RecoilValue<T>
         | Promise<T>

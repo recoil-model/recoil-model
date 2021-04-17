@@ -22,8 +22,14 @@
  */
 
 import recoil from 'recoil';
+import { validateValue } from './util';
 
-export const fieldFamily = ({ default: $default, defaultGet }) => {
+export const fieldFamily = ({ default: $default, defaultGet, validate: $validate }) => {
+
+  const validate = $validate ?? (params => ({ get }) => {
+    const v = get(value(params));
+    return validateValue.ok;
+  })
   const f = (key, nodeField) => {
     let value;
     if (defaultGet) {
@@ -44,15 +50,7 @@ export const fieldFamily = ({ default: $default, defaultGet }) => {
     return {
       validate: recoil.selectorFamily({
         key: [key, '$validate'].join('-'),
-        get: params => ({ get }) => {
-          const v = get(value(params));
-          return {
-            path: nodeField.join('.'),
-            error: false,
-            message: null,
-            messages: [],
-          };
-        },
+        get: validate,
       }),
       value,
     };

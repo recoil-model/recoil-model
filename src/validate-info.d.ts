@@ -20,8 +20,27 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
+
+
+type ValidateInfoFields = {
+  [fields: string]: ValidateInfo | ValidateInfoFields
+}
 export type ValidateInfo = {
   error: boolean;
   message: string | null;
   messages: string[];
+  _$ValidateInfo: true
 };
+
+export type ValidateInfoModel = ValidateInfo & {
+  fields: ValidateInfoFields;
+};
+
+type validateInfo_Fields = {
+  [fields: string]: string | string[] | Fields
+}
+export declare const validateInfo: {
+  error(...msg: string[]): ValidateInfo
+  fields(fields: validateInfo_Fields): ValidateInfoModel
+  ok: ValidateInfo
+}

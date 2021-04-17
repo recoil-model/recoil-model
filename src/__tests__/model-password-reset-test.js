@@ -21,56 +21,44 @@
  *   SOFTWARE.
  */
 
-import { model } from '../model';
-import { fieldYup } from '../yup';
 import * as YUP from 'yup';
 import { snapshot_UNSTABLE } from 'recoil';
+import { model } from '../model';
+import { fieldYup } from '../yup';
+import { field } from '../field';
 import { validateInfo } from '../validate-info';
 
-describe('model-validation-test', () => {
-  const personModel = model({
-    key: 'model-validation-test',
+describe('model-password-reset-test', () => {
+  const passwords = model({
+    key: 'model-password-reset-test',
     fields: {
-      name: fieldYup({
+      password: fieldYup({
         default: '',
-        schemas: YUP.string().required("field name is required"),
+        schemas: YUP.string().required("password name is required"),
       }),
-      email: fieldYup({
+      repeatPassword: field({
         default: '',
-        schemas: YUP.string().email().required("field email is required"),
+        validate: ({ get }) => {
+          const password = get(passwords.fields.password.value)
+          const repeatPassword = get(passwords.fields.repeatPassword.value)
+          if (password != repeatPassword) {
+            return validateInfo.error("Your password and confirmation password do not match.")
+          }
+          return validateInfo.ok;
+        }
       }),
-    },
+    }
   });
-  test('model-validation-test', done => {
+  test('model-password-reset-test', done => {
     snapshot_UNSTABLE(async ({ set, getPromise }) => {
-      await expect(getPromise(personModel.validate))
-        .resolves
-        .toEqual(
-          validateInfo.fields({
-            "name": validateInfo.error("field name is required"),
-            "email": validateInfo.error("field email is required"),
-          }));
-      set(personModel.value, {
-        name: 'Eric fillipe',
-        email: 'Erid$gmail.com'
+      set(passwords.value, {
+        password: '15ty',
+        repeatPassword: '15ty7'
       });
-      await expect(getPromise(personModel.validate))
-        .resolves
-        .toEqual(
-          validateInfo.fields({
-            "name": validateInfo.ok,
-            "email": validateInfo.error("this must be a valid email"),
-          }));
 
-      set(personModel.fields.email.value, 'ericfillipework@gmail.com');
-
-      await expect(getPromise(personModel.validate))
+      await expect(getPromise(passwords.fields.repeatPassword.validate))
         .resolves
-        .toEqual(
-          validateInfo.fields({
-            "name": validateInfo.ok,
-            "email": validateInfo.ok,
-          }));
+        .toEqual(validateInfo.error("Your password and confirmation password do not match."));
       done();
     });
   });

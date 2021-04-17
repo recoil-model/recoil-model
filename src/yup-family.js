@@ -22,6 +22,7 @@
  */
 
 import recoil from 'recoil';
+import { validateInfo } from './validate-info';
 
 export const fieldFamilyYup = ({ schemas, default: $default, defaultGet }) => {
   const f = (key, nodeField) => {
@@ -47,26 +48,13 @@ export const fieldFamilyYup = ({ schemas, default: $default, defaultGet }) => {
         get: params => ({ get }) => {
           const v = get(value(params));
           if (schemas) {
-            const info = {
-              path: nodeField.join('.'),
-              error: !schemas.isValidSync(v),
-              message: null,
-              messages: [],
-            };
             try {
               schemas.validateSync(v);
             } catch (e) {
-              info.message = e.message;
-              info.messages = [e.message];
+              return validateInfo.error(e.message);
             }
-            return info;
           }
-          return {
-            path: nodeField.join('.'),
-            error: false,
-            message: null,
-            messages: [],
-          };
+          return validateInfo.ok
         },
       }),
       value,

@@ -20,9 +20,11 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
+
 export { model } from './model';
 export { fieldYup } from './yup';
 export { fieldFamilyYup } from './yup-family';
 export { field } from './field';
 export { fieldFamily } from './field-family';
 export { modelFamily } from './model-family';
+export { validateInfo } from './validate-info';

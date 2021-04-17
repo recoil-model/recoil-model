@@ -124,10 +124,12 @@ export const validateValue = (fields, fieldsB, get) => {
   const lValidateValueArray = validateValueArray(fields, fieldsB, validateFields);
   const messages = lValidateValueArray.flatMap(a => a.messages).flatMap(e => e);
   return {
+    _$ValidateInfo: true,
     fields: validateFields,
     messages,
     message: messages.length > 0 ? messages.join("\n") : null,
-    error: messages.length > 0
+    error: messages.length > 0,
+
   }
 }
 
