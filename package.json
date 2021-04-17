@@ -2,13 +2,17 @@
   "name": "recoil-model",
   "version": "0.0.0-alpha.10",
   "description": "Recoil Form",
+  "types": "./types/index.d.ts",
   "main": "cjs/recoil-model.js",
   "module": "es/recoil-model.js",
-  "types": "./types/index.d.ts",
+  "react-native": "native/recoil-model.js",
+  "unpkg": "umd/recoil-model.js",
   "files": [
     "es",
     "cjs",
-    "types"
+    "types",
+    "native",
+    "umd"
   ],
   "repository": "https://github.com/ericfillipe1/recoil-model.git",
   "license": "MIT",

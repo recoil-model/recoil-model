@@ -20,35 +20,157 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-import resolve from '@rollup/plugin-node-resolve';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import pkg from './package.json';
+import commonjs from '@rollup/plugin-commonjs';
 import babel from 'rollup-plugin-babel'
+import { terser } from 'rollup-plugin-terser';
+import replace from '@rollup/plugin-replace';
+
+const externalLibs = ['react', 'react-dom', 'yup', 'recoil'];
+
+const defaultNodeResolveConfig = {};
+const nodeResolvePlugin = nodeResolve(defaultNodeResolveConfig);
+
 const extensions = ['.js']
-export default [
-  // CommonJS (for Node) and ES module (for bundlers) build.
+
+const commonPlugins = [
+  babel({
+    runtimeHelpers: true,
+    exclude: 'node_modules/**',
+    extensions
+  }),
   {
-    input: 'src/index.js',
-    output: [
-      {
-        file: pkg.main,
-        format: 'cjs'
-      },
-      {
-        file: pkg.module,
-        format: 'es'
+    resolveId: source => {
+      if (source === 'React') {
+        return { id: 'react', external: true };
       }
-    ],
-    external: [
-      'recoil',
-    ],
-    plugins: [
-      resolve({
-        extensions
-      }),
-      babel({
-        runtimeHelpers: true,
-        exclude: 'node_modules/**',
-        extensions
-      }),
-    ]
-  }]
+      if (source === 'ReactDOM') {
+        return { id: 'react-dom', external: true };
+      }
+      if (source === 'ReactNative') {
+        return { id: 'react-native', external: true };
+      }
+      if (source === 'ReactNative') {
+        return { id: 'react-native', external: true };
+      }
+      return null;
+    },
+  },
+  nodeResolvePlugin,
+  commonjs(),
+];
+
+const developmentPlugins = [
+  ...commonPlugins,
+  replace({
+    'process.env.NODE_ENV': JSON.stringify('development'),
+  }),
+];
+
+const productionPlugins = [
+  ...commonPlugins,
+  replace({
+    'process.env.NODE_ENV': JSON.stringify('production'),
+  }),
+  terser({ mangle: false }),
+];
+
+
+const inputFile = 'src/index.js';
+
+export default [
+  // CommonJS
+  {
+    input: inputFile,
+    output: {
+      file: `cjs/recoil-model.js`,
+      format: 'cjs',
+      exports: 'named',
+    },
+    external: externalLibs,
+    plugins: commonPlugins,
+  },
+
+  // ES
+  {
+    input: inputFile,
+    output: {
+      file: `es/recoil-model.js`,
+      format: 'es',
+      exports: 'named',
+    },
+    external: externalLibs,
+    plugins: commonPlugins,
+  },
+
+  // React Native
+  {
+    input: inputFile,
+    output: {
+      file: `native/recoil-model.js`,
+      format: 'es',
+      exports: 'named',
+    },
+    external: [...externalLibs, 'react-native'],
+    plugins: commonPlugins.map(plugin => {
+      // Replace the default nodeResolve plugin
+      if (plugin === nodeResolvePlugin) {
+        return nodeResolve({
+          ...defaultNodeResolveConfig,
+          extensions: ['.native.js', '.js'],
+        });
+      }
+
+      return plugin;
+    }),
+  },
+
+  // ES for Browsers
+  {
+    input: inputFile,
+    output: {
+      file: `es/recoil-model.mjs`,
+      format: 'es',
+      exports: 'named',
+    },
+    external: externalLibs,
+    plugins: productionPlugins,
+  },
+
+  // UMD Development
+  {
+    input: inputFile,
+    output: {
+      file: `umd/recoil-model.js`,
+      format: 'umd',
+      name: 'RecoilModel',
+      exports: 'named',
+      globals: {
+        react: 'React',
+        'react-dom': 'ReactDOM',
+        'recoil': 'Recoil',
+      },
+    },
+    external: externalLibs,
+    plugins: developmentPlugins,
+  },
+
+  // UMD Production
+  {
+    input: inputFile,
+    output: {
+      file: `umd/recoil-model.min.js`,
+      format: 'umd',
+      name: 'RecoilModel',
+      exports: 'named',
+      globals: {
+        'react': 'React',
+        'react-dom': 'ReactDOM',
+        'recoil': 'Recoil',
+      },
+    },
+    external: externalLibs,
+    plugins: productionPlugins,
+  },
+]

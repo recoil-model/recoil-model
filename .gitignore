@@ -3,3 +3,5 @@ nightly-build-files
 types
 es
 cjs
+native
+umd
