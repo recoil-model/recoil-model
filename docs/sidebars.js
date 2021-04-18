@@ -1,0 +1,96 @@
+/*
+ *   Copyright (c) 2021 
+ *   All rights reserved.
+ */
+
+module.exports = {
+  docs: {
+    Introduction: [
+      'introduction/motivation',
+      //'introduction/core-concepts',
+      'introduction/installation',
+      'introduction/getting-started',
+    ],
+    'Basic Tutorial': [
+      // 'basic-tutorial/intro',
+      // 'basic-tutorial/atoms',
+      // 'basic-tutorial/selectors',
+      // 'basic-tutorial/demo',
+      // 'basic-tutorial/performance',
+    ],
+    Guides: [
+      //   {
+      //     'Migrating to Recoil': [
+      //       'guides/migrating/from-react-state',
+      //       'guides/migrating/from-redux',
+      //       'guides/migrating/from-mobx',
+      //     ],
+      //   },
+      //'guides/asynchronous-data-queries',
+      //'guides/atom-effects',
+      //'guides/testing',
+      //'guides/dev-tools',
+      //   'guides/code-splitting',
+    ],
+
+    'API Reference': [
+      //'api-reference/core/RecoilRoot',
+      {
+        Core: [
+          //'api-reference/core/RecoilRoot',
+          {
+            State: [
+              // 'api-reference/core/atom',
+              // 'api-reference/core/selector',
+              // 'api-reference/core/Loadable',
+              // 'api-reference/core/useRecoilState',
+              // 'api-reference/core/useRecoilValue',
+              // 'api-reference/core/useSetRecoilState',
+              // 'api-reference/core/useResetRecoilState',
+              // 'api-reference/core/useRecoilStateLoadable',
+              // 'api-reference/core/useRecoilValueLoadable',
+              // 'api-reference/core/useGetRecoilValueInfo',
+              // 'api-reference/core/isRecoilValue',
+              // 'api-reference/core/DefaultValue',
+            ],
+            Snapshots: [
+              // 'api-reference/core/Snapshot',
+              // 'api-reference/core/useRecoilTransactionObserver',
+              // 'api-reference/core/useRecoilSnapshot',
+              // 'api-reference/core/useGotoRecoilSnapshot',
+            ],
+          },
+          //'api-reference/core/useRecoilCallback',
+          {
+            Misc: [
+              //  'api-reference/core/useRecoilBridgeAcrossReactRoots',
+            ],
+          },
+        ],
+      },
+      // 'api-reference/core/useRecoilCallback',
+      {
+        Utils: [
+          // 'api-reference/utils/atomFamily',
+          // 'api-reference/utils/selectorFamily',
+          // 'api-reference/utils/constSelector',
+          // 'api-reference/utils/errorSelector',
+          // 'api-reference/utils/noWait',
+          // 'api-reference/utils/waitForAll',
+          // 'api-reference/utils/waitForAllSettled',
+          // 'api-reference/utils/waitForNone',
+          // 'api-reference/utils/waitForAny',
+        ],
+        Snapshots: [
+          // 'api-reference/core/Snapshot',
+          // 'api-reference/core/useRecoilTransactionObserver',
+          // 'api-reference/core/useRecoilSnapshot',
+          // 'api-reference/core/useGotoRecoilSnapshot',
+        ],
+        Misc: [
+          // 'api-reference/core/useRecoilBridgeAcrossReactRoots',
+        ],
+      },
+    ],
+  },
+};
