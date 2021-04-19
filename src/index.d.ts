@@ -27,3 +27,4 @@ export { field } from './field';
 export { fieldFamily } from './field-family';
 export { modelFamily } from './model-family';
 export { validateInfo } from './validate-info';
+export { RecoilModelField } from './recoil-model-field';
