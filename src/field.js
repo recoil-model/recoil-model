@@ -22,10 +22,11 @@
  */
 
 import recoil from 'recoil';
+import { validateInfo } from './validate-info';
 
 export const field = ({ default: $default, validate: $validate, defaultGet }) => {
   let validate = $validate ?? (() => {
-    return validateValue.ok;
+    return validateInfo.ok;
   })
   const f = (key, nodeField) => {
     let value;

@@ -25,10 +25,10 @@ import React, { useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState, waitForAll } from 'recoil';
 
 export const RecoilModelField = (props) => {
-  let valueRecoilState;
-  let validateRecoilState;
   const field = props.field;
   const param = props.param;
+  let valueRecoilState = field.value;
+  let validateRecoilState = field.validate;
   const CC = props.component;
   if (typeof field.value == 'function') {
     valueRecoilState = field.value(param)
