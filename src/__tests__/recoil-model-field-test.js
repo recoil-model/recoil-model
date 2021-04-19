@@ -62,16 +62,16 @@ describe('recoil-model-field', () => {
     },
   });
   const id = "01";
-  test('model-family-basic', async done => {
+  test('recoil-model-field', async done => {
     const { getByTestId } = render(
       <RecoilRoot>
         <RecoilModelField
-          params={id}
+          param={id}
           field={personModel.fields.name}
           component={(props) => <input data-testid="input-name-1"  {...mapToProps(props)} />}
         />
         <RecoilModelField
-          params={id}
+          param={id}
           field={personModel.fields.name}
           component={(props) => <input data-testid="input-name-2"  {...mapToProps(props)} />}
         />

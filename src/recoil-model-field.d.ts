@@ -38,13 +38,13 @@ type RecoilModelFieldProps<IPropsResolve> = {
 }
 
 
-type RecoilModelFieldFamilyProps<IPropsResolve, IParam> = {
+type RecoilModelFieldFamilyProps<IPropsResolve, IParam extends SerializableParam> = {
   field: ModelFieldFamily<IPropsResolve, IParam>;
   param: IParam;
   component: (props: Props<IPropsResolve>, param: IParam) => ReactElement<any, any>;
 }
 
 export const RecoilModelField: {
-  <IPropsResolve>(props: RecoilModelFieldProps<IPropsResolve>, context?: any): ReactElement<any, any>
   <IPropsResolve, IParam extends SerializableParam>(props: RecoilModelFieldFamilyProps<IPropsResolve, IParam>, context?: any): ReactElement<any, any>
+  <IPropsResolve>(props: RecoilModelFieldProps<IPropsResolve>, context?: any): ReactElement<any, any>
 }
