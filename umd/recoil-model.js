@@ -141,7 +141,7 @@
 
     return obj;
   };
-  var validateValue$1 = function validateValue(fields, fieldsB, get) {
+  var validateValue = function validateValue(fields, fieldsB, get) {
     var validateFields = validateValueTree(fields, fieldsB, get);
     var lValidateValueArray = validateValueArray(fields, fieldsB, validateFields);
     var messages = lValidateValueArray.flatMap(function (a) {
@@ -205,7 +205,7 @@
       key: [key, '$validate'].join('-'),
       get: function get(_ref) {
         var _get = _ref.get;
-        return validateValue$1(props.fields, fields, function (s) {
+        return validateValue(props.fields, fields, function (s) {
           return _get(s);
         });
       }
@@ -532,7 +532,7 @@
         $validate = _ref.validate,
         defaultGet = _ref.defaultGet;
     var validate = $validate !== null && $validate !== void 0 ? $validate : function () {
-      return validateValue.ok;
+      return validateInfo.ok;
     };
 
     var f = function f(key, nodeField) {
@@ -597,7 +597,7 @@
       return function (_ref2) {
         var get = _ref2.get;
         get(value(params));
-        return validateValue$1.ok;
+        return validateInfo.ok;
       };
     };
 
@@ -664,7 +664,7 @@
       get: function get(param) {
         return function (_ref) {
           var get = _ref.get;
-          return validateValue$1(props.fields, fields, function (s) {
+          return validateValue(props.fields, fields, function (s) {
             return get(s(param));
           });
         };
@@ -741,10 +741,10 @@
   }
 
   var RecoilModelField = function RecoilModelField(props) {
-    var valueRecoilState;
-    var validateRecoilState;
     var field = props.field;
     var param = props.param;
+    var valueRecoilState = field.value;
+    var validateRecoilState = field.validate;
     var CC = props.component;
 
     if (typeof field.value == 'function') {
