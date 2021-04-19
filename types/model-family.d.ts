@@ -26,31 +26,31 @@ import { RecoilState, RecoilValue } from "recoil"
 import { RecoilValueReadOnly } from "recoil"
 import { NodeKey } from "./node-key"
 import { ValidateInfo } from './validate-info';
-export type ModelFamilyField<T, P extends SerializableParam> = {
+export type ModelFieldFamily<T, P extends SerializableParam> = {
   validate: (param: P) => RecoilValueReadOnly<ValidateInfo>;
   value: (param: P) => RecoilState<T>;
 }
-export type ModelFamilyFieldBuild<T, P extends SerializableParam> = {
-  (): ModelFamilyField<T, P>
+export type ModelFieldFamilyBuild<T, P extends SerializableParam> = {
+  (): ModelFieldFamily<T, P>
   _$ModelField: true
 }
-export type ModelFamilyFields<T, P extends SerializableParam> = {
+export type ModelFieldFamilys<T, P extends SerializableParam> = {
   [k in keyof T]:
-  T[k] extends any[] ? ModelFamilyFieldBuild<T[k]> :
-  T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyFieldBuild<T[k], P>
+  T[k] extends any[] ? ModelFieldFamilyBuild<T[k]> :
+  T[k] extends { [key: string]: any } ? ModelFieldFamilys<T[k], P> : ModelFieldFamilyBuild<T[k], P>
 }
-export type ModelFamilyFieldsReturn<T, P extends SerializableParam> = {
+export type ModelFieldFamilysReturn<T, P extends SerializableParam> = {
   [k in keyof T]:
-  T[k] extends any[] ? ModelFamilyField<T[k]> :
-  T[k] extends { [key: string]: any } ? ModelFamilyFields<T[k], P> : ModelFamilyField<T[k], P>
+  T[k] extends any[] ? ModelFieldFamily<T[k]> :
+  T[k] extends { [key: string]: any } ? ModelFieldFamilys<T[k], P> : ModelFieldFamily<T[k], P>
 }
 
 type ModelFamilyReturn<T, P extends SerializableParam> = {
-  fields: ModelFamilyFieldsReturn<T, P>;
+  fields: ModelFieldFamilysReturn<T, P>;
   validate: (param: P) => RecoilValueReadOnly<ValidateInfo>;
   value: (param: P) => RecoilState<T>;
   __$model: true;
 };
 export declare const modelFamily: {
-  <T, P extends SerializableParam>(props: { fields: ModelFamilyFields<T, P>; key: NodeKey }): ModelFamilyReturn<T, P>;
+  <T, P extends SerializableParam>(props: { fields: ModelFieldFamilys<T, P>; key: NodeKey }): ModelFamilyReturn<T, P>;
 };

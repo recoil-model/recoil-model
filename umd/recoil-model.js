@@ -1,12 +1,13 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('recoil')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'recoil'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.RecoilModel = {}, global.Recoil));
-}(this, (function (exports, recoil) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('recoil'), require('react')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'recoil', 'react'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.RecoilModel = {}, global.Recoil, global.React));
+}(this, (function (exports, recoil, React) { 'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
   var recoil__default = /*#__PURE__*/_interopDefaultLegacy(recoil);
+  var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
 
   function _arrayLikeToArray(arr, len) {
     if (len == null || len > arr.length) len = arr.length;
@@ -700,6 +701,75 @@
     };
   };
 
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  function _iterableToArrayLimit(arr, i) {
+    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+  }
+
+  var RecoilModelField = function RecoilModelField(props) {
+    var valueRecoilState;
+    var validateRecoilState;
+    var field = props.field;
+    var param = props.param;
+    var CC = props.component;
+
+    if (typeof field.value == 'function') {
+      valueRecoilState = field.value(param);
+    }
+
+    if (typeof field.validate == 'function') {
+      validateRecoilState = field.validate(param);
+    }
+
+    var setValue = recoil.useSetRecoilState(valueRecoilState);
+
+    var _useRecoilValue = recoil.useRecoilValue(recoil.waitForAll([valueRecoilState, validateRecoilState])),
+        _useRecoilValue2 = _slicedToArray(_useRecoilValue, 2),
+        value = _useRecoilValue2[0],
+        validate = _useRecoilValue2[1];
+
+    return /*#__PURE__*/React__default['default'].createElement(CC, {
+      value: value,
+      setValue: setValue,
+      validate: validate
+    });
+  };
+
+  exports.RecoilModelField = RecoilModelField;
   exports.field = field;
   exports.fieldFamily = fieldFamily;
   exports.fieldFamilyYup = fieldFamilyYup;

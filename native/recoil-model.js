@@ -1,4 +1,5 @@
-import recoil, { DefaultValue } from 'recoil';
+import recoil, { DefaultValue, useSetRecoilState, useRecoilValue, waitForAll } from 'recoil';
+import React from 'react';
 
 function _arrayLikeToArray(arr, len) {
   if (len == null || len > arr.length) len = arr.length;
@@ -692,4 +693,72 @@ var modelFamily = function modelFamily(props) {
   };
 };
 
-export { field, fieldFamily, fieldFamilyYup, fieldYup, model, modelFamily, validateInfo };
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+var RecoilModelField = function RecoilModelField(props) {
+  var valueRecoilState;
+  var validateRecoilState;
+  var field = props.field;
+  var param = props.param;
+  var CC = props.component;
+
+  if (typeof field.value == 'function') {
+    valueRecoilState = field.value(param);
+  }
+
+  if (typeof field.validate == 'function') {
+    validateRecoilState = field.validate(param);
+  }
+
+  var setValue = useSetRecoilState(valueRecoilState);
+
+  var _useRecoilValue = useRecoilValue(waitForAll([valueRecoilState, validateRecoilState])),
+      _useRecoilValue2 = _slicedToArray(_useRecoilValue, 2),
+      value = _useRecoilValue2[0],
+      validate = _useRecoilValue2[1];
+
+  return /*#__PURE__*/React.createElement(CC, {
+    value: value,
+    setValue: setValue,
+    validate: validate
+  });
+};
+
+export { RecoilModelField, field, fieldFamily, fieldFamilyYup, fieldYup, model, modelFamily, validateInfo };
