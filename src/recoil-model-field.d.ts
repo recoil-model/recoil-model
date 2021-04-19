@@ -20,38 +20,31 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-import {
-  GetRecoilValue,
-  RecoilValue,
-  SerializableParam,
-} from 'recoil';
-import { BaseSchema } from 'yup';
-import { ValidateInfo } from '../nightly-build-files/types/model';
-import { ModelFieldFamilyBuild } from './model-family';
+import { ElementType, ReactElement, ComponentType } from 'react'
+import { RecoilState, RecoilValue, SerializableParam, waitForAll } from 'recoil'
+import { ModelField } from './model'
+import { ModelFieldFamily } from './model-family'
+import { ValidateInfo } from './validate-info'
 
-export declare const fieldFamily: {
-  <T, P extends SerializableParam>(
-    props: (
-      {
-        validate?: (
-          param: P,
-        ) => (opts: {
-          get: GetRecoilValue;
-        }) => Promise<ValidateInfo> | RecoilValue<ValidateInfo> | ValidateInfo;
-      } | {
-        default:
-        | RecoilValue<T>
-        | Promise<T>
-        | T
-        | ((param: P) => T | RecoilValue<T> | Promise<T>);
-      }
-      | {
-        defaultGet: (
-          param: P,
-        ) => (opts: {
-          get: GetRecoilValue;
-        }) => Promise<T> | RecoilValue<T> | T;
-      }
-    ),
-  ): ModelFieldFamilyBuild<T, P>;
-};
+type Props<IPropsResolve> = {
+  value: IPropsResolve,
+  setValue: (p: IPropsResolve) => void,
+  validate: ValidateInfo
+}
+
+type RecoilModelFieldProps<IPropsResolve> = {
+  field: ModelField<IPropsResolve>;
+  component: (props: Props<IPropsResolve>) => ReactElement<any, any>;
+}
+
+
+type RecoilModelFieldFamilyProps<IPropsResolve, IParam> = {
+  field: ModelFieldFamily<IPropsResolve, IParam>;
+  param: IParam;
+  component: (props: Props<IPropsResolve>, param: IParam) => ReactElement<any, any>;
+}
+
+export const RecoilModelField: {
+  <IPropsResolve>(props: RecoilModelFieldProps<IPropsResolve>, context?: any): ReactElement<any, any>
+  <IPropsResolve, IParam extends SerializableParam>(props: RecoilModelFieldFamilyProps<IPropsResolve, IParam>, context?: any): ReactElement<any, any>
+}

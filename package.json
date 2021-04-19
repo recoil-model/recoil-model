@@ -27,6 +27,9 @@
     "deploy-nightly": "yarn build && node scripts/deploy_nightly_build.js"
   },
   "dependencies": {
+    "@testing-library/react": "^11.2.6",
+    "@testing-library/user-event": "^13.1.4",
+    "@types/react": "^17.0.3",
     "yup": "^0.32.9"
   },
   "peerDependencies": {

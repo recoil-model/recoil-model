@@ -20,38 +20,25 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
-import {
-  GetRecoilValue,
-  RecoilValue,
-  SerializableParam,
-} from 'recoil';
-import { BaseSchema } from 'yup';
-import { ValidateInfo } from '../nightly-build-files/types/model';
-import { ModelFieldFamilyBuild } from './model-family';
 
-export declare const fieldFamily: {
-  <T, P extends SerializableParam>(
-    props: (
-      {
-        validate?: (
-          param: P,
-        ) => (opts: {
-          get: GetRecoilValue;
-        }) => Promise<ValidateInfo> | RecoilValue<ValidateInfo> | ValidateInfo;
-      } | {
-        default:
-        | RecoilValue<T>
-        | Promise<T>
-        | T
-        | ((param: P) => T | RecoilValue<T> | Promise<T>);
-      }
-      | {
-        defaultGet: (
-          param: P,
-        ) => (opts: {
-          get: GetRecoilValue;
-        }) => Promise<T> | RecoilValue<T> | T;
-      }
-    ),
-  ): ModelFieldFamilyBuild<T, P>;
-};
+import React, { useMemo } from 'react';
+import { useRecoilValue, useSetRecoilState, waitForAll } from 'recoil';
+
+export const RecoilModelField = (props) => {
+  let valueRecoilState;
+  let validateRecoilState;
+  const field = props.field;
+  const param = props.param;
+  const CC = props.component;
+  if (typeof field.value == 'function') {
+    valueRecoilState = field.value(param)
+  }
+  if (typeof field.validate == 'function') {
+    validateRecoilState = field.validate(param)
+  }
+  const setValue = useSetRecoilState(valueRecoilState);
+  const [value, validate] = useRecoilValue(
+    waitForAll([valueRecoilState, validateRecoilState]),
+  );
+  return <CC value={value} setValue={setValue} validate={validate} />;
+}

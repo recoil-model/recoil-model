@@ -26,7 +26,7 @@ import {
   SerializableParam,
 } from 'recoil';
 import { BaseSchema } from 'yup';
-import { ModelFamilyFieldBuild } from './model-family';
+import { ModelFieldFamilyBuild } from './model-family';
 
 
 
@@ -50,5 +50,5 @@ export declare const fieldFamilyYup: {
           }) => Promise<T> | RecoilValue<T> | T;
         }
       ),
-  ): ModelFamilyFieldBuild<T, P>;
+  ): ModelFieldFamilyBuild<T, P>;
 };
