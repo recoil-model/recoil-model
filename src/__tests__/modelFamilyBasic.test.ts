@@ -21,58 +21,53 @@
  *   SOFTWARE.
  */
 
-import { modelFamily } from '../model-family';
-import { fieldFamilyYup } from '../yup-family';
-import { validateInfo } from '../validate-info';
-import * as YUP from 'yup';
+import { modelFamily } from '../core/model';
+import { fieldFamilyYup } from '../yup';
 import { snapshot_UNSTABLE } from 'recoil';
 
-describe('model-family-validation-test', () => {
+describe('model-basic', () => {
   const personModel = modelFamily({
-    key: 'model-family-validation-test',
+    key: 'model-basic',
     fields: {
       name: fieldFamilyYup({
         default: '',
-        schemas: YUP.string().required("field name is required"),
       }),
       email: fieldFamilyYup({
         default: '',
-        schemas: YUP.string().email().required("field email is required"),
       }),
     },
   });
-  const id = "21";
-  test('model-family-validation-test', done => {
-    snapshot_UNSTABLE(async ({ set, getPromise }) => {
-      await expect(getPromise(personModel.validate(id)))
-        .resolves
-        .toEqual(
-          validateInfo.fields({
-            "name": validateInfo.error("field name is required"),
-            "email": validateInfo.error("field email is required"),
-          })
-        );
+  const id = "01";
+  test('model-basic', done => {
+    snapshot_UNSTABLE(async ({ set, reset, getPromise }) => {
       set(personModel.value(id), {
         name: 'Eric fillipe',
-        email: 'Erid$gmail.com'
+        email: ''
       });
-      await expect(getPromise(personModel.validate(id)))
+      await expect(getPromise(personModel.value(id)))
         .resolves
-        .toEqual(
-          validateInfo.fields({
-            "name": validateInfo.ok,
-            "email": validateInfo.error("this must be a valid email"),
-          }));
-
+        .toEqual({
+          name: 'Eric fillipe',
+          email: ''
+        });
       set(personModel.fields.email.value(id), 'ericfillipework@gmail.com');
-
-      await expect(getPromise(personModel.validate(id)))
+      await expect(getPromise(personModel.fields.email.value(id)))
         .resolves
-        .toEqual(
-          validateInfo.fields({
-            "name": validateInfo.ok,
-            "email": validateInfo.ok,
-          }));
+        .toEqual('ericfillipework@gmail.com');
+
+      await expect(getPromise(personModel.value(id)))
+        .resolves
+        .toEqual({
+          name: 'Eric fillipe',
+          email: 'ericfillipework@gmail.com'
+        });
+      reset(personModel.value(id));
+      await expect(getPromise(personModel.value(id)))
+        .resolves
+        .toEqual({
+          name: '',
+          email: ''
+        });
       done();
     });
   });

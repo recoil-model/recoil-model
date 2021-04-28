@@ -21,11 +21,11 @@
  *   SOFTWARE.
  */
 
-import { model } from '../model';
+import { model } from '../core/model';
 import { fieldYup } from '../yup';
 import * as YUP from 'yup';
 import { snapshot_UNSTABLE } from 'recoil';
-import { validateInfo } from '../validate-info';
+import { validateInfo } from '../core/validateInfo';
 
 describe('model-validation-test', () => {
   const personModel = model({

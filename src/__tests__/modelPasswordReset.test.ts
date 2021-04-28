@@ -21,52 +21,44 @@
  *   SOFTWARE.
  */
 
-import { model } from '../model';
-import { fieldYup } from '../yup';
+import * as YUP from 'yup';
 import { snapshot_UNSTABLE } from 'recoil';
+import { model } from '../core/model';
+import { fieldYup } from '../yup';
+import { validateInfo } from '../core/validateInfo';
+import { field } from '../core/field';
 
-describe('model-basic-test', () => {
-  const personModel = model({
-    key: 'model-basic-test',
+describe('model-password-reset-test', () => {
+  const passwords = model({
+    key: 'model-password-reset-test',
     fields: {
-      name: fieldYup({
+      password: fieldYup({
         default: '',
+        schemas: YUP.string().required("password name is required"),
       }),
-      email: fieldYup({
+      repeatPassword: field({
         default: '',
+        validate: ({ get }) => {
+          const password = get(passwords.fields.password.value)
+          const repeatPassword = get(passwords.fields.repeatPassword.value)
+          if (password != repeatPassword) {
+            return validateInfo.error("Your password and confirmation password do not match.")
+          }
+          return validateInfo.ok;
+        }
       }),
-    },
+    }
   });
-  test('model-basic-test', done => {
-    snapshot_UNSTABLE(async ({ set, reset, getPromise }) => {
-      set(personModel.value, {
-        name: 'Eric fillipe',
-        email: ''
+  test('model-password-reset-test', done => {
+    snapshot_UNSTABLE(async ({ set, getPromise }) => {
+      set(passwords.value, {
+        password: '15ty',
+        repeatPassword: '15ty7'
       });
-      await expect(getPromise(personModel.value))
-        .resolves
-        .toEqual({
-          name: 'Eric fillipe',
-          email: ''
-        });
-      set(personModel.fields.email.value, 'ericfillipework@gmail.com');
-      await expect(getPromise(personModel.fields.email.value))
-        .resolves
-        .toEqual('ericfillipework@gmail.com');
 
-      await expect(getPromise(personModel.value))
+      await expect(getPromise(passwords.fields.repeatPassword.validate))
         .resolves
-        .toEqual({
-          name: 'Eric fillipe',
-          email: 'ericfillipework@gmail.com'
-        });
-      reset(personModel.value);
-      await expect(getPromise(personModel.value))
-        .resolves
-        .toEqual({
-          name: '',
-          email: ''
-        });
+        .toEqual(validateInfo.error("Your password and confirmation password do not match."));
       done();
     });
   });

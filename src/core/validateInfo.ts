@@ -21,55 +21,76 @@
  *   SOFTWARE.
  */
 
-const errorFields = (obj) => {
-  let fields = {}
-  let array = [];
+export class ValidateInfo {
+  constructor(
+    public message: string | null,
+    public messages: string[],
+    public error: boolean
+  ) {
+
+  }
+};
+
+export class ValidateInfoModel extends ValidateInfo {
+  constructor(
+    message: string | null,
+    messages: string[],
+    error: boolean,
+    public fields: ValidateInfoFields
+  ) {
+    super(message, messages, error);
+  }
+};
+export type ValidateInfoFields = {
+  [fields: string]: ValidateInfo | ValidateInfoFields
+}
+
+const errorFields = (obj: ValidateInfoFields) => {
+  let fields: ValidateInfoFields = {}
+  let array: ValidateInfo[] = [];
   for (const key in obj) {
     let element = obj[key]
-    if (element && element._$ValidateInfo) {
+    if (element instanceof ValidateInfo) {
       fields[key] = element
-      array.push(fields[key]);
+      array.push(fields[key] as ValidateInfo);
     }
     else {
       const { fields: fieldsA, array: arrayA } = errorFields(element)
       fields[key] = fieldsA;
-      array = [array, ...arrayA]
+      array = [...array, ...arrayA]
     }
   }
   return { fields: fields, array };
 }
-const ok = {
-  error: false,
-  message: null,
-  messages: [],
-  _$ValidateInfo: true
-}
+const ok = new ValidateInfo(
+  null,
+  [],
+  false,
+)
 
-const fields = (...msgs) => {
+const fields = (...msgs: any) => {
   const { fields, array } = errorFields(msgs[0]);
-  const erros = array.filter(e => e.error)
+  const erros = array.filter((e) => e.error)
   if (erros.length == 0) {
     return {
       ...ok,
       fields
     }
   }
-  return ({
-    fields,
-    error: true,
-    message: erros.map(e => e.message).join('\n'),
-    messages: erros.map(e => e.message),
-    _$ValidateInfo: true
-  })
+  return new ValidateInfoModel(
+    erros.map((e: any) => e.message).join('\n'),
+    erros.map((e: any) => e.message),
+    true,
+    fields
+  )
 };
 
-const error = (...msgs) => {
-  return ({
-    error: true,
-    message: msgs.join(''),
-    messages: msgs,
-    _$ValidateInfo: true
-  })
+const error: any = (...msgs: any[]) => {
+  return new ValidateInfo(
+    msgs.length > 0 ? msgs.join('') : null,
+    msgs,
+    true
+  )
 };
 export const validateInfo = {
   fields,
