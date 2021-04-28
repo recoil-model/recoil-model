@@ -51,7 +51,7 @@ type FieldYupProps<T> = {
 
 export const fieldYup = <T>(props: FieldYupProps<T>) => {
 
-    return new Field((key, nodeField) => {
+    return new Field((key) => {
         let value: RecoilState<T>;
         if (props.defaultSelector) {
             let ldefault = recoil.selector({
@@ -110,7 +110,7 @@ type FieldFamilyYupProps<T, P> = {
 export const fieldFamilyYup = <T, P extends SerializableParam>(
     props: FieldFamilyYupProps<T, P>
 ): FieldFamily<T, P> => {
-    return new FieldFamily((key, nodeField) => {
+    return new FieldFamily((key) => {
         let value: (param: P) => RecoilState<T>;
         if (props.defaultSelector) {
             let ldefault = recoil.selectorFamily({

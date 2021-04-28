@@ -85,7 +85,7 @@ export const field = <T>(props: FieldProps<T>): Field<T> => {
   let validate = props.validate ?? (() => {
     return validateInfo.ok;
   })
-  return new Field((key, nodeField) => {
+  return new Field((key) => {
     let value;
     if (props.defaultSelector) {
       let ldefault = recoil.selector({
@@ -137,10 +137,10 @@ type FieldFamilyProps<T, P extends SerializableParam> =
 export const fieldFamily = <T, P extends SerializableParam>(
   props: FieldFamilyProps<T, P>
 ): FieldFamily<T, P> => {
-  const validate = props.validate ?? (params => ({ get }) => {
+  const validate = props.validate ?? (() => ({ }) => {
     return validateInfo.ok;
   })
-  return new FieldFamily((key, nodeField) => {
+  return new FieldFamily((key) => {
     let value;
     if (props.defaultSelector) {
       let ldefault = recoil.selectorFamily({

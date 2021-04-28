@@ -21,7 +21,6 @@
  *   SOFTWARE.
  */
 import nodeResolve from '@rollup/plugin-node-resolve';
-import pkg from './package.json';
 import commonjs from '@rollup/plugin-commonjs';
 import babel from 'rollup-plugin-babel'
 import { terser } from 'rollup-plugin-terser';
@@ -29,10 +28,12 @@ import replace from '@rollup/plugin-replace';
 
 const externalLibs = ['react', 'react-dom', 'yup', 'recoil'];
 
-const defaultNodeResolveConfig = {};
+const extensions = ['.ts']
+const defaultNodeResolveConfig = {
+  extensions
+};
 const nodeResolvePlugin = nodeResolve(defaultNodeResolveConfig);
 
-const extensions = ['.js']
 
 const commonPlugins = [
   babel({
@@ -77,7 +78,7 @@ const productionPlugins = [
 ];
 
 
-const inputFile = 'src/index.js';
+const inputFile = 'src/index.ts';
 
 export default [
   // CommonJS
@@ -118,7 +119,7 @@ export default [
       if (plugin === nodeResolvePlugin) {
         return nodeResolve({
           ...defaultNodeResolveConfig,
-          extensions: ['.native.js', '.js'],
+          extensions: ['.native.ts', '.ts', '.native.tsx', '.tsx'],
         });
       }
 

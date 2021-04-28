@@ -258,7 +258,7 @@ const getValueFamily = <T, P extends SerializableParam>(
   }
 };
 
-const getValue = <T, P extends SerializableParam>(
+const getValue = <T>(
   props: {
     fields: Field<T> | Fields<T>, get: GetRecoilValue
   }): T => {
