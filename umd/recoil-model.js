@@ -1,13 +1,12 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('recoil'), require('react')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'recoil', 'react'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.RecoilModel = {}, global.Recoil, global.React));
-}(this, (function (exports, recoil, React) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('recoil')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'recoil'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.RecoilModel = {}, global.Recoil));
+}(this, (function (exports, recoil) { 'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
   var recoil__default = /*#__PURE__*/_interopDefaultLegacy(recoil);
-  var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
 
   function _arrayLikeToArray(arr, len) {
     if (len == null || len > arr.length) len = arr.length;
@@ -24,7 +23,7 @@
   }
 
   function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
   }
 
   function _unsupportedIterableToArray(o, minLen) {
@@ -44,198 +43,31 @@
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
-  var buildFields = function buildFields(props) {
-    return function (key, nodeField, fields, itens) {
-      if (fields.__$model) {
-        fields.fieldsArray.forEach(function (element) {
-          itens.push({
-            item: element.item,
-            nodeField: [].concat(_toConsumableArray(nodeField), _toConsumableArray(element.nodeField))
-          });
-        });
-        return fields.fields;
-      }
-
-      if (fields._$ModelField) {
-        var item = fields([key].concat(_toConsumableArray(nodeField)).join('-'), nodeField);
-        itens.push({
-          item: item,
-          nodeField: nodeField
-        });
-        return item;
-      }
-
-      var obj = {}; // eslint-disable-next-line guard-for-in
-
-      for (var _key in fields) {
-        obj[_key] = buildFields()(key, [].concat(_toConsumableArray(nodeField), [_key]), fields[_key], itens);
-      }
-
-      return obj;
-    };
-  };
-  var resetValue = function resetValue(fields, fieldsB, reset) {
-    if (fields._$ModelField) {
-      return reset(fieldsB);
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
+  }
 
-    if (fields.__$model) {
-      return reset(fields);
+  function _objectDestructuringEmpty(obj) {
+    if (obj == null) throw new TypeError("Cannot destructure undefined");
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
     }
+  }
 
-    for (var _key in fields) {
-      resetValue(fields[_key], fieldsB[_key], reset);
-    }
-  };
-  var setValue = function setValue(fields, fieldsB, value, set, reset) {
-    if (fields._$ModelField) {
-      return set(fieldsB, value);
-    }
-
-    if (fields.__$model) {
-      return set(fields, value);
-    }
-
-    for (var _key in fields) {
-      var v = void 0;
-
-      if (!(value instanceof recoil.DefaultValue) && value && value[_key]) {
-        v = value[_key];
-        setValue(fields[_key], fieldsB[_key], v, set, reset);
-      } else {
-        resetValue(fields[_key], fieldsB[_key], reset);
-      }
-    }
-  };
-  var validateValueArray = function validateValueArray(fields, fieldsB, validateFields) {
-    if (fields._$ModelField) {
-      return [validateFields];
-    }
-
-    if (fields.__$model) {
-      return [validateFields];
-    }
-
-    var array = [];
-
-    for (var _key in fields) {
-      array = [].concat(_toConsumableArray(array), _toConsumableArray(validateValueArray(fields[_key], fieldsB[_key], validateFields[_key])));
-    }
-
-    return array;
-  };
-  var validateValueTree = function validateValueTree(fields, fieldsB, get) {
-    if (fields._$ModelField) {
-      return get(fieldsB.validate);
-    }
-
-    if (fields.__$model) {
-      return get(fieldsB.validate);
-    }
-
-    var obj = {};
-
-    for (var _key in fields) {
-      obj[_key] = validateValueTree(fields[_key], fieldsB[_key], get);
-    }
-
-    return obj;
-  };
-  var validateValue = function validateValue(fields, fieldsB, get) {
-    var validateFields = validateValueTree(fields, fieldsB, get);
-    var lValidateValueArray = validateValueArray(fields, fieldsB, validateFields);
-    var messages = lValidateValueArray.flatMap(function (a) {
-      return a.messages;
-    }).flatMap(function (e) {
-      return e;
-    });
-    return {
-      _$ValidateInfo: true,
-      fields: validateFields,
-      messages: messages,
-      message: messages.length > 0 ? messages.join("\n") : null,
-      error: messages.length > 0
-    };
-  };
-  var getValue = function getValue(fields, fieldsB, get) {
-    if (fields._$ModelField) {
-      return get(fieldsB);
-    }
-
-    if (fields.__$model) {
-      return get(fields);
-    }
-
-    var obj = {}; // eslint-disable-next-line guard-for-in
-
-    for (var _key in fields) {
-      obj[_key] = getValue(fields[_key], fieldsB[_key], get);
-    }
-
-    return obj;
-  };
-
-  /*
-   *   Copyright (c) 2021 Eric Fillipe
-   *   All rights reserved.
-
-   *   Permission is hereby granted, free of charge, to any person obtaining a copy
-   *   of this software and associated documentation files (the "Software"), to deal
-   *   in the Software without restriction, including without limitation the rights
-   *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   *   copies of the Software, and to permit persons to whom the Software is
-   *   furnished to do so, subject to the following conditions:
-   
-   *   The above copyright notice and this permission notice shall be included in all
-   *   copies or substantial portions of the Software.
-   
-   *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   *   SOFTWARE.
-   */
-  var model = function model(props) {
-    var key = props.key;
-    var fieldsArray = [];
-    var fields = buildFields()([key, '$fields'].join('-'), [], props.fields, fieldsArray);
-    var validate = recoil__default['default'].selector({
-      key: [key, '$validate'].join('-'),
-      get: function get(_ref) {
-        var _get = _ref.get;
-        return validateValue(props.fields, fields, function (s) {
-          return _get(s);
-        });
-      }
-    });
-    var value = recoil__default['default'].selector({
-      key: [key, '$value'].join('-'),
-      get: function get(_ref2) {
-        var _get2 = _ref2.get;
-        return getValue(props.fields, fields, function (field) {
-          return _get2(field.value);
-        });
-      },
-      set: function set(_ref3, value) {
-        var _set = _ref3.set,
-            reset = _ref3.reset;
-        return setValue(props.fields, fields, value, function (field, value) {
-          return _set(field.value, value);
-        }, function (field) {
-          return reset(field.value);
-        });
-      }
-    });
-    return {
-      fields: fields,
-      fieldsArray: fieldsArray,
-      validate: validate,
-      value: value,
-      __$model: true
-    };
-  };
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
 
   function _defineProperty(obj, key, value) {
     if (key in obj) {
@@ -252,9 +84,76 @@
     return obj;
   }
 
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
   function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
   function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+  function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+  function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
   /*
    *   Copyright (c) 2021 Eric Fillipe
@@ -278,6 +177,31 @@
    *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    *   SOFTWARE.
    */
+  var ValidateInfo = function ValidateInfo(message, messages, error) {
+    _classCallCheck(this, ValidateInfo);
+
+    this.message = message;
+    this.messages = messages;
+    this.error = error;
+  };
+  var ValidateInfoModel = /*#__PURE__*/function (_ValidateInfo) {
+    _inherits(ValidateInfoModel, _ValidateInfo);
+
+    var _super = _createSuper(ValidateInfoModel);
+
+    function ValidateInfoModel(message, messages, error, fields) {
+      var _this;
+
+      _classCallCheck(this, ValidateInfoModel);
+
+      _this = _super.call(this, message, messages, error);
+      _this.fields = fields;
+      return _this;
+    }
+
+    return ValidateInfoModel;
+  }(ValidateInfo);
+
   var errorFields = function errorFields(obj) {
     var fields = {};
     var array = [];
@@ -285,7 +209,7 @@
     for (var key in obj) {
       var element = obj[key];
 
-      if (element && element._$ValidateInfo) {
+      if (element instanceof ValidateInfo) {
         fields[key] = element;
         array.push(fields[key]);
       } else {
@@ -294,7 +218,7 @@
             arrayA = _errorFields.array;
 
         fields[key] = fieldsA;
-        array = [array].concat(_toConsumableArray(arrayA));
+        array = [].concat(_toConsumableArray(array), _toConsumableArray(arrayA));
       }
     }
 
@@ -304,12 +228,7 @@
     };
   };
 
-  var ok = {
-    error: false,
-    message: null,
-    messages: [],
-    _$ValidateInfo: true
-  };
+  var ok = new ValidateInfo(null, [], false);
 
   var fields = function fields() {
     var _errorFields2 = errorFields(arguments.length <= 0 ? undefined : arguments[0]),
@@ -326,17 +245,11 @@
       });
     }
 
-    return {
-      fields: fields,
-      error: true,
-      message: erros.map(function (e) {
-        return e.message;
-      }).join('\n'),
-      messages: erros.map(function (e) {
-        return e.message;
-      }),
-      _$ValidateInfo: true
-    };
+    return new ValidateInfoModel(erros.map(function (e) {
+      return e.message;
+    }).join('\n'), erros.map(function (e) {
+      return e.message;
+    }), true, fields);
   };
 
   var error = function error() {
@@ -344,18 +257,461 @@
       msgs[_key] = arguments[_key];
     }
 
-    return {
-      error: true,
-      message: msgs.join(''),
-      messages: msgs,
-      _$ValidateInfo: true
-    };
+    return new ValidateInfo(msgs.length > 0 ? msgs.join('') : null, msgs, true);
   };
 
   var validateInfo = {
     fields: fields,
     error: error,
     ok: ok
+  };
+
+  var FieldFamily = /*#__PURE__*/function () {
+    function FieldFamily(FnBuild) {
+      _classCallCheck(this, FieldFamily);
+
+      this.FnBuild = FnBuild;
+    }
+
+    _createClass(FieldFamily, [{
+      key: "build",
+      value: function build(key, nodeField) {
+        var _this$FnBuild = this.FnBuild(key, nodeField),
+            validate = _this$FnBuild.validate,
+            value = _this$FnBuild.value;
+
+        this.validate = validate;
+        this.value = value;
+      }
+    }]);
+
+    return FieldFamily;
+  }();
+  var Field = /*#__PURE__*/function () {
+    function Field(FnBuild) {
+      _classCallCheck(this, Field);
+
+      this.FnBuild = FnBuild;
+    }
+
+    _createClass(Field, [{
+      key: "build",
+      value: function build(key, nodeField) {
+        var _this$FnBuild2 = this.FnBuild(key, nodeField),
+            validate = _this$FnBuild2.validate,
+            value = _this$FnBuild2.value;
+
+        this.validate = validate;
+        this.value = value;
+      }
+    }]);
+
+    return Field;
+  }();
+  var field = function field(props) {
+    var _props$validate;
+
+    var validate = (_props$validate = props.validate) !== null && _props$validate !== void 0 ? _props$validate : function () {
+      return validateInfo.ok;
+    };
+    return new Field(function (key) {
+      var value;
+
+      if (props.defaultSelector) {
+        var ldefault = recoil__default['default'].selector({
+          key: [key, '$value', '$default'].join('-'),
+          get: props.defaultSelector
+        });
+        value = recoil__default['default'].atom({
+          key: [key, '$value'].join('-'),
+          "default": ldefault
+        });
+      } else {
+        value = recoil__default['default'].atom({
+          key: [key, '$value'].join('-'),
+          "default": props["default"]
+        });
+      }
+
+      return {
+        validate: recoil__default['default'].selector({
+          key: [key, 'props.validate'].join('-'),
+          get: validate
+        }),
+        value: value
+      };
+    });
+  };
+  var fieldFamily = function fieldFamily(props) {
+    var _props$validate2;
+
+    var validate = (_props$validate2 = props.validate) !== null && _props$validate2 !== void 0 ? _props$validate2 : function () {
+      return function (_ref) {
+        _objectDestructuringEmpty(_ref);
+
+        return validateInfo.ok;
+      };
+    };
+    return new FieldFamily(function (key) {
+      var value;
+
+      if (props.defaultSelector) {
+        var ldefault = recoil__default['default'].selectorFamily({
+          key: [key, '$value', '$default'].join('-'),
+          get: props.defaultSelector
+        });
+        value = recoil__default['default'].atomFamily({
+          key: [key, '$value'].join('-'),
+          "default": ldefault
+        });
+      } else {
+        value = recoil__default['default'].atomFamily({
+          key: [key, '$value'].join('-'),
+          "default": props["default"]
+        });
+      }
+
+      return {
+        validate: recoil__default['default'].selectorFamily({
+          key: [key, 'props.validate'].join('-'),
+          get: validate
+        }),
+        value: value
+      };
+    });
+  };
+
+  var ModelFamily = function ModelFamily(props) {
+    _classCallCheck(this, ModelFamily);
+
+    var key = props.key;
+    var fieldsArray = [];
+    this.fields = props.fields;
+    buildFields()([key, '$fields'].join('-'), [], props.fields, fieldsArray);
+    this.validate = recoil__default['default'].selectorFamily({
+      key: [key, '$validate'].join('-'),
+      get: function get(param) {
+        return function (_ref) {
+          var get = _ref.get;
+          return validateValueFamily({
+            fields: props.fields,
+            get: get,
+            param: param
+          });
+        };
+      }
+    });
+    this.value = recoil__default['default'].selectorFamily({
+      key: [key, '$value'].join('-'),
+      get: function get(param) {
+        return function (_ref2) {
+          var get = _ref2.get;
+          return getValueFamily({
+            fields: props.fields,
+            param: param,
+            get: get
+          });
+        };
+      },
+      set: function set(param) {
+        return function (_ref3, value) {
+          var set = _ref3.set,
+              reset = _ref3.reset;
+          return setValueFamily({
+            param: param,
+            fields: props.fields,
+            set: set,
+            reset: reset,
+            value: value
+          });
+        };
+      }
+    });
+  };
+  var Model = function Model(props) {
+    _classCallCheck(this, Model);
+
+    var key = props.key;
+    var fieldsArray = [];
+    this.fields = props.fields;
+    buildFields()([key, '$fields'].join('-'), [], props.fields, fieldsArray);
+    this.validate = recoil__default['default'].selector({
+      key: [key, '$validate'].join('-'),
+      get: function get(_ref4) {
+        var _get = _ref4.get;
+        var ddd = validateValue({
+          fields: props.fields,
+          get: _get
+        });
+        return ddd;
+      }
+    });
+    this.value = recoil__default['default'].selector({
+      key: [key, '$value'].join('-'),
+      get: function get(_ref5) {
+        var _get2 = _ref5.get;
+        return getValue({
+          fields: props.fields,
+          get: _get2
+        });
+      },
+      set: function set(_ref6, value) {
+        var _set = _ref6.set,
+            reset = _ref6.reset;
+        return setValue({
+          fields: props.fields,
+          set: _set,
+          reset: reset,
+          value: value
+        });
+      }
+    });
+  };
+  var modelFamily = function modelFamily(props) {
+    return new ModelFamily(props);
+  };
+  var model = function model(props) {
+    return new Model(props);
+  };
+  var buildFields = function buildFields(props) {
+    return function (key, nodeField, fields, itens) {
+      if (fields instanceof FieldFamily || fields instanceof Field) {
+        fields.build([key].concat(_toConsumableArray(nodeField)).join('-'), nodeField);
+        itens.push({
+          item: fields,
+          nodeField: nodeField
+        });
+      } else {
+        for (var _key in fields) {
+          buildFields()(key, [].concat(_toConsumableArray(nodeField), [_key]), fields[_key], itens);
+        }
+      }
+    };
+  };
+
+  var validateValueArrayFamily = function validateValueArrayFamily(props) {
+    if (props.fields instanceof FieldFamily) {
+      return [props.get(props.fields.validate(props.param))];
+    } else {
+      var array = [];
+
+      for (var _key in props.fields) {
+        array = [].concat(_toConsumableArray(array), _toConsumableArray(validateValueArrayFamily({
+          fields: props.fields[_key],
+          get: props.get,
+          param: props.param
+        })));
+      }
+
+      return array;
+    }
+  };
+
+  var validateValueTreeFamily = function validateValueTreeFamily(props) {
+    if (props.fields instanceof FieldFamily) {
+      return props.get(props.fields.validate(props.param));
+    } else {
+      var obj = {};
+
+      for (var _key in props.fields) {
+        obj[_key] = validateValueTreeFamily({
+          fields: props.fields[_key],
+          get: props.get,
+          param: props.param
+        });
+      }
+
+      return obj;
+    }
+  };
+
+  var validateValueFamily = function validateValueFamily(props) {
+    var validateFields = validateValueTreeFamily(props);
+    var lValidateValueArray = validateValueArrayFamily(props);
+    var messages = lValidateValueArray.flatMap(function (a) {
+      return a.messages;
+    }).flatMap(function (e) {
+      return e;
+    });
+    return new ValidateInfoModel(messages.length > 0 ? messages.join("\n") : null, messages, messages.length > 0, validateFields);
+  };
+
+  var getValueFamily = function getValueFamily(props) {
+    var fields = props.fields,
+        get = props.get,
+        param = props.param;
+
+    if (fields instanceof FieldFamily) {
+      return get(fields.value(param));
+    } else {
+      var obj = {};
+
+      for (var _key in fields) {
+        obj[_key] = getValueFamily({
+          fields: fields[_key],
+          get: get,
+          param: param
+        });
+      }
+
+      return obj;
+    }
+  };
+
+  var getValue = function getValue(props) {
+    var fields = props.fields,
+        get = props.get;
+
+    if (fields instanceof Field) {
+      return get(fields.value);
+    } else {
+      var obj = {};
+
+      for (var _key in fields) {
+        obj[_key] = getValue({
+          fields: fields[_key],
+          get: get
+        });
+      }
+
+      return obj;
+    }
+  };
+
+  var setValueFamily = function setValueFamily(props) {
+    var fields = props.fields,
+        set = props.set,
+        param = props.param,
+        value = props.value,
+        reset = props.reset;
+
+    if (fields instanceof FieldFamily) {
+      set(fields.value(param), value);
+    } else {
+      for (var _key in fields) {
+        if (!(value instanceof recoil.DefaultValue) && value && value[_key]) {
+          setValueFamily({
+            fields: fields[_key],
+            set: set,
+            reset: reset,
+            param: param,
+            value: value[_key]
+          });
+        } else {
+          resetValueFamily({
+            fields: fields[_key],
+            reset: reset,
+            param: param
+          });
+        }
+      }
+    }
+  };
+
+  var resetValueFamily = function resetValueFamily(props) {
+    var fields = props.fields,
+        param = props.param,
+        reset = props.reset;
+
+    if (fields instanceof FieldFamily) {
+      reset(fields.value(param));
+    } else {
+      for (var _key in fields) {
+        resetValueFamily({
+          fields: fields[_key],
+          reset: reset,
+          param: param
+        });
+      }
+    }
+  };
+
+  var setValue = function setValue(props) {
+    var fields = props.fields,
+        set = props.set,
+        value = props.value,
+        reset = props.reset;
+
+    if (fields instanceof Field) {
+      set(fields.value, value);
+    } else {
+      for (var _key in fields) {
+        if (!(value instanceof recoil.DefaultValue) && value && value[_key]) {
+          setValue({
+            fields: fields[_key],
+            set: set,
+            reset: reset,
+            value: value[_key]
+          });
+        } else {
+          resetValue({
+            fields: fields[_key],
+            reset: reset
+          });
+        }
+      }
+    }
+  };
+
+  var resetValue = function resetValue(props) {
+    var fields = props.fields,
+        reset = props.reset;
+
+    if (fields instanceof Field) {
+      reset(fields.value);
+    } else {
+      for (var _key in fields) {
+        resetValue({
+          fields: fields[_key],
+          reset: reset
+        });
+      }
+    }
+  };
+
+  var validateValueArray = function validateValueArray(props) {
+    if (props.fields instanceof Field) {
+      return [props.get(props.fields.validate)];
+    } else {
+      var array = [];
+
+      for (var _key in props.fields) {
+        array = [].concat(_toConsumableArray(array), _toConsumableArray(validateValueArray({
+          fields: props.fields[_key],
+          get: props.get
+        })));
+      }
+
+      return array;
+    }
+  };
+
+  var validateValueTree = function validateValueTree(props) {
+    if (props.fields instanceof Field) {
+      return props.get(props.fields.validate);
+    } else {
+      var obj = {};
+
+      for (var _key in props.fields) {
+        obj[_key] = validateValueTree({
+          fields: props.fields[_key],
+          get: props.get
+        });
+      }
+
+      return obj;
+    }
+  };
+
+  var validateValue = function validateValue(props) {
+    var validateFields = validateValueTree(props);
+    var lValidateValueArray = validateValueArray(props);
+    var messages = lValidateValueArray.flatMap(function (a) {
+      return a.messages;
+    }).flatMap(function (e) {
+      return e;
+    });
+    return new ValidateInfoModel(messages.length > 0 ? messages.join("\n") : null, messages, messages.length > 0, validateFields);
   };
 
   /*
@@ -368,10 +724,10 @@
    *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
    *   copies of the Software, and to permit persons to whom the Software is
    *   furnished to do so, subject to the following conditions:
-   
+
    *   The above copyright notice and this permission notice shall be included in all
    *   copies or substantial portions of the Software.
-   
+
    *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
    *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
    *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -380,41 +736,37 @@
    *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    *   SOFTWARE.
    */
-  var fieldYup = function fieldYup(_ref) {
-    var schemas = _ref.schemas,
-        $default = _ref["default"],
-        defaultGet = _ref.defaultGet;
-
-    var f = function f(key, nodeField) {
+  var fieldYup = function fieldYup(props) {
+    return new Field(function (key) {
       var value;
 
-      if (defaultGet) {
-        $default = recoil__default['default'].selector({
+      if (props.defaultSelector) {
+        var ldefault = recoil__default['default'].selector({
           key: [key, '$value', '$default'].join('-'),
-          get: defaultGet
+          get: props.defaultSelector
         });
         value = recoil__default['default'].atom({
           key: [key, '$value'].join('-'),
-          "default": $default
+          "default": ldefault
         });
       } else {
         value = recoil__default['default'].atom({
           key: [key, '$value'].join('-'),
-          "default": $default
+          "default": props["default"]
         });
       }
 
       return {
         validate: recoil__default['default'].selector({
-          key: [key, '$validate'].join('-'),
-          get: function get(_ref2) {
-            var _get = _ref2.get;
+          key: [key, 'props.validate'].join('-'),
+          get: function get(_ref) {
+            var _get = _ref.get;
 
             var v = _get(value);
 
-            if (schemas) {
+            if (props.schemas) {
               try {
-                schemas.validateSync(v);
+                props.schemas.validateSync(v);
               } catch (e) {
                 return validateInfo.error(e.message);
               }
@@ -425,69 +777,39 @@
         }),
         value: value
       };
-    };
-
-    f._$ModelField = true;
-    return f;
+    });
   };
-
-  /*
-   *   Copyright (c) 2021 Eric Fillipe
-   *   All rights reserved.
-
-   *   Permission is hereby granted, free of charge, to any person obtaining a copy
-   *   of this software and associated documentation files (the "Software"), to deal
-   *   in the Software without restriction, including without limitation the rights
-   *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   *   copies of the Software, and to permit persons to whom the Software is
-   *   furnished to do so, subject to the following conditions:
-   
-   *   The above copyright notice and this permission notice shall be included in all
-   *   copies or substantial portions of the Software.
-   
-   *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   *   SOFTWARE.
-   */
-  var fieldFamilyYup = function fieldFamilyYup(_ref) {
-    var schemas = _ref.schemas,
-        $default = _ref["default"],
-        defaultGet = _ref.defaultGet;
-
-    var f = function f(key, nodeField) {
+  var fieldFamilyYup = function fieldFamilyYup(props) {
+    return new FieldFamily(function (key) {
       var value;
 
-      if (defaultGet) {
-        $default = recoil__default['default'].selectorFamily({
+      if (props.defaultSelector) {
+        var ldefault = recoil__default['default'].selectorFamily({
           key: [key, '$value', '$default'].join('-'),
-          get: defaultGet
+          get: props.defaultSelector
         });
         value = recoil__default['default'].atomFamily({
           key: [key, '$value'].join('-'),
-          "default": $default
+          "default": ldefault
         });
       } else {
         value = recoil__default['default'].atomFamily({
           key: [key, '$value'].join('-'),
-          "default": $default
+          "default": props["default"]
         });
       }
 
       return {
         validate: recoil__default['default'].selectorFamily({
-          key: [key, '$validate'].join('-'),
+          key: [key, 'props.validate'].join('-'),
           get: function get(params) {
             return function (_ref2) {
               var get = _ref2.get;
               var v = get(value(params));
 
-              if (schemas) {
+              if (props.schemas) {
                 try {
-                  schemas.validateSync(v);
+                  props.schemas.validateSync(v);
                 } catch (e) {
                   return validateInfo.error(e.message);
                 }
@@ -499,277 +821,9 @@
         }),
         value: value
       };
-    };
-
-    f._$ModelField = true;
-    return f;
-  };
-
-  /*
-   *   Copyright (c) 2021 Eric Fillipe
-   *   All rights reserved.
-
-   *   Permission is hereby granted, free of charge, to any person obtaining a copy
-   *   of this software and associated documentation files (the "Software"), to deal
-   *   in the Software without restriction, including without limitation the rights
-   *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   *   copies of the Software, and to permit persons to whom the Software is
-   *   furnished to do so, subject to the following conditions:
-   
-   *   The above copyright notice and this permission notice shall be included in all
-   *   copies or substantial portions of the Software.
-   
-   *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   *   SOFTWARE.
-   */
-  var field = function field(_ref) {
-    var $default = _ref["default"],
-        $validate = _ref.validate,
-        defaultGet = _ref.defaultGet;
-    var validate = $validate !== null && $validate !== void 0 ? $validate : function () {
-      return validateInfo.ok;
-    };
-
-    var f = function f(key, nodeField) {
-      var value;
-
-      if (defaultGet) {
-        $default = recoil__default['default'].selector({
-          key: [key, '$value', '$default'].join('-'),
-          get: defaultGet
-        });
-        value = recoil__default['default'].atom({
-          key: [key, '$value'].join('-'),
-          "default": $default
-        });
-      } else {
-        value = recoil__default['default'].atom({
-          key: [key, '$value'].join('-'),
-          "default": $default
-        });
-      }
-
-      return {
-        validate: recoil__default['default'].selector({
-          key: [key, '$validate'].join('-'),
-          get: validate
-        }),
-        value: value
-      };
-    };
-
-    f._$ModelField = true;
-    return f;
-  };
-
-  /*
-   *   Copyright (c) 2021 Eric Fillipe
-   *   All rights reserved.
-
-   *   Permission is hereby granted, free of charge, to any person obtaining a copy
-   *   of this software and associated documentation files (the "Software"), to deal
-   *   in the Software without restriction, including without limitation the rights
-   *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   *   copies of the Software, and to permit persons to whom the Software is
-   *   furnished to do so, subject to the following conditions:
-   
-   *   The above copyright notice and this permission notice shall be included in all
-   *   copies or substantial portions of the Software.
-   
-   *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   *   SOFTWARE.
-   */
-  var fieldFamily = function fieldFamily(_ref) {
-    var $default = _ref["default"],
-        defaultGet = _ref.defaultGet,
-        $validate = _ref.validate;
-    var validate = $validate !== null && $validate !== void 0 ? $validate : function (params) {
-      return function (_ref2) {
-        var get = _ref2.get;
-        get(value(params));
-        return validateInfo.ok;
-      };
-    };
-
-    var f = function f(key, nodeField) {
-      var value;
-
-      if (defaultGet) {
-        $default = recoil__default['default'].selectorFamily({
-          key: [key, '$value', '$default'].join('-'),
-          get: defaultGet
-        });
-        value = recoil__default['default'].atomFamily({
-          key: [key, '$value'].join('-'),
-          "default": $default
-        });
-      } else {
-        value = recoil__default['default'].atomFamily({
-          key: [key, '$value'].join('-'),
-          "default": $default
-        });
-      }
-
-      return {
-        validate: recoil__default['default'].selectorFamily({
-          key: [key, '$validate'].join('-'),
-          get: validate
-        }),
-        value: value
-      };
-    };
-
-    f._$ModelField = true;
-    return f;
-  };
-
-  /*
-   *   Copyright (c) 2021 Eric Fillipe
-   *   All rights reserved.
-
-   *   Permission is hereby granted, free of charge, to any person obtaining a copy
-   *   of this software and associated documentation files (the "Software"), to deal
-   *   in the Software without restriction, including without limitation the rights
-   *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   *   copies of the Software, and to permit persons to whom the Software is
-   *   furnished to do so, subject to the following conditions:
-   
-   *   The above copyright notice and this permission notice shall be included in all
-   *   copies or substantial portions of the Software.
-   
-   *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   *   SOFTWARE.
-   */
-  var modelFamily = function modelFamily(props) {
-    var key = props.key;
-    var fieldsArray = [];
-    var fields = buildFields()([key, '$fields'].join('-'), [], props.fields, fieldsArray);
-    var validate = recoil__default['default'].selectorFamily({
-      key: [key, '$validate'].join('-'),
-      get: function get(param) {
-        return function (_ref) {
-          var get = _ref.get;
-          return validateValue(props.fields, fields, function (s) {
-            return get(s(param));
-          });
-        };
-      }
-    });
-    var value = recoil__default['default'].selectorFamily({
-      key: [key, '$value'].join('-'),
-      get: function get(param) {
-        return function (_ref2) {
-          var get = _ref2.get;
-          return getValue(props.fields, fields, function (field) {
-            return get(field.value(param));
-          });
-        };
-      },
-      set: function set(param) {
-        return function (_ref3, value) {
-          var set = _ref3.set,
-              reset = _ref3.reset;
-          return setValue(props.fields, fields, value, function (field, value) {
-            return set(field.value(param), value);
-          }, function (field) {
-            return reset(field.value(param));
-          });
-        };
-      }
-    });
-    return {
-      fields: fields,
-      fieldsArray: fieldsArray,
-      validate: validate,
-      value: value,
-      __$model: true
-    };
-  };
-
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr)) return arr;
-  }
-
-  function _iterableToArrayLimit(arr, i) {
-    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
-
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"] != null) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }
-
-    return _arr;
-  }
-
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
-  }
-
-  var RecoilModelField = function RecoilModelField(props) {
-    var field = props.field;
-    var param = props.param;
-    var valueRecoilState = field.value;
-    var validateRecoilState = field.validate;
-    var CC = props.component;
-
-    if (typeof field.value == 'function') {
-      valueRecoilState = field.value(param);
-    }
-
-    if (typeof field.validate == 'function') {
-      validateRecoilState = field.validate(param);
-    }
-
-    var setValue = recoil.useSetRecoilState(valueRecoilState);
-
-    var _useRecoilValue = recoil.useRecoilValue(recoil.waitForAll([valueRecoilState, validateRecoilState])),
-        _useRecoilValue2 = _slicedToArray(_useRecoilValue, 2),
-        value = _useRecoilValue2[0],
-        validate = _useRecoilValue2[1];
-
-    return /*#__PURE__*/React__default['default'].createElement(CC, {
-      value: value,
-      setValue: setValue,
-      validate: validate
     });
   };
 
-  exports.RecoilModelField = RecoilModelField;
   exports.field = field;
   exports.fieldFamily = fieldFamily;
   exports.fieldFamilyYup = fieldFamilyYup;
