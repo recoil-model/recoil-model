@@ -22,17 +22,17 @@
  */
 
 import { modelFamily } from '../core/model';
-import { fieldFamilyYup } from '../yup';
 import { snapshot_UNSTABLE } from 'recoil';
+import { fieldFamily } from '../core/field';
 
 describe('model-basic', () => {
   const personModel = modelFamily({
     key: 'model-basic',
     fields: {
-      name: fieldFamilyYup({
+      name: fieldFamily({
         default: '',
       }),
-      email: fieldFamilyYup({
+      email: fieldFamily({
         default: '',
       }),
     },

@@ -22,9 +22,7 @@
  */
 
 import {
-  GetRecoilValue,
   RecoilState,
-  RecoilValue,
   SerializableParam,
 } from 'recoil';
 import recoil from 'recoil';
@@ -33,10 +31,10 @@ import { DefaultAndDefaultFamilyProps, DefaultAndDefaultProps } from './defaultP
 
 
 
-type FieldProps<T> = DefaultAndDefaultProps<T>
+type AssociationProps<T> = DefaultAndDefaultProps<T>
 
-type FieldFamilyProps<T, P extends SerializableParam> = DefaultAndDefaultFamilyProps<T, P>
-export class FieldFamily<T, P extends SerializableParam> {
+type AssociationFamilyProps<T, P extends SerializableParam> = DefaultAndDefaultFamilyProps<T, P>
+export class AssociationFamily<T, P extends SerializableParam> {
   public value!: (param: P) => RecoilState<T>
   public build(key: string, nodeField: string[]) {
     const { value } = this.FnBuild(key, nodeField)
@@ -50,7 +48,7 @@ export class FieldFamily<T, P extends SerializableParam> {
     }) {
   }
 }
-export class Field<T> {
+export class Association<T> {
   public value!: RecoilState<T>
   public build(key: string, nodeField: string[]) {
     const { value } = this.FnBuild(key, nodeField)
@@ -65,8 +63,8 @@ export class Field<T> {
   }
 }
 
-export const field = <T>(props: FieldProps<T>): Field<T> => {
-  return new Field<T>((key) => {
+export const association = <T>(props: AssociationProps<T>): Association<T> => {
+  return new Association<T>((key) => {
     let value;
     if ((props as any).defaultSelector) {
       let ldefault = recoil.selector<T>({
@@ -88,10 +86,10 @@ export const field = <T>(props: FieldProps<T>): Field<T> => {
     };
   });
 };
-export const fieldFamily = <T, P extends SerializableParam>(
-  props: FieldFamilyProps<T, P>
-): FieldFamily<T, P> => {
-  return new FieldFamily<T, P>((key) => {
+export const associationFamily = <T, P extends SerializableParam>(
+  props: AssociationFamilyProps<T, P>
+): AssociationFamily<T, P> => {
+  return new AssociationFamily<T, P>((key) => {
     let value;
     if ((props as any).defaultSelector) {
       let ldefault = recoil.selectorFamily<T, P>({

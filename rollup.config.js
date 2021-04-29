@@ -28,7 +28,7 @@ import replace from '@rollup/plugin-replace';
 
 const externalLibs = ['react', 'react-dom', 'yup', 'recoil'];
 
-const extensions = ['.ts']
+const extensions = ['.ts', '.tsx']
 const defaultNodeResolveConfig = {
   extensions
 };

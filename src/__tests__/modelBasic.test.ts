@@ -21,22 +21,23 @@
  *   SOFTWARE.
  */
 
-import { model } from '../core/model';
-import { fieldYup } from '../yup';
 import { snapshot_UNSTABLE } from 'recoil';
-
+import { model } from '..';
+import { field } from '../core/field';
 describe('model-basic-test', () => {
   const personModel = model({
     key: 'model-basic-test',
     fields: {
-      name: fieldYup({
+      name: field({
         default: '',
       }),
-      email: fieldYup({
-        default: '',
-      }),
+      email: field({
+        default: ""
+      })
+
     },
   });
+  personModel.fields.email.value
   test('model-basic-test', done => {
     snapshot_UNSTABLE(async ({ set, reset, getPromise }) => {
       set(personModel.value, {

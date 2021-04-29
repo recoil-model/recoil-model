@@ -21,11 +21,11 @@
  *   SOFTWARE.
  */
 
-import recoil, { DefaultValue, GetRecoilValue, RecoilState, RecoilValueReadOnly, ResetRecoilState, SerializableParam, SetRecoilState } from 'recoil';
+import recoil, { DefaultValue, GetRecoilValue, RecoilState, RecoilValue, RecoilValueReadOnly, ResetRecoilState, SerializableParam, SetRecoilState } from 'recoil';
 import { Field, FieldFamily } from './field';
 import { NodeKey } from './nodeKey';
-import { ValidateInfo, ValidateInfoFields, ValidateInfoModel } from './validateInfo';
 
+import { DefaultFamilyProps, DefaultProps } from './defaultProps';
 
 export type FieldsFamily<T, P extends SerializableParam> = {
   [k in keyof T]:
@@ -41,8 +41,8 @@ export type Fields<T> = {
 type ModelFamilyProps<T, P extends SerializableParam> = {
   fields: FieldsFamily<T, P>;
   key: NodeKey
-}
-type ModelProps<T> = { fields: Fields<T>; key: NodeKey };
+} & Partial<DefaultFamilyProps<T, P>>
+type ModelProps<T> = { fields: Fields<T>; key: NodeKey } & Partial<DefaultProps<T>>;
 type FieldsArray = ({
   item: Field<any> | FieldFamily<any, any>,
   nodeField: string[]
@@ -50,8 +50,8 @@ type FieldsArray = ({
 
 export class ModelFamily<T, P extends SerializableParam> {
   fields: FieldsFamily<T, P>;
-  validate: (param: P) => RecoilValueReadOnly<ValidateInfo>;
   value: (param: P) => RecoilState<T>;
+
 
   constructor(props: ModelFamilyProps<T, P>) {
     const { key } = props;
@@ -63,14 +63,6 @@ export class ModelFamily<T, P extends SerializableParam> {
       props.fields,
       fieldsArray,
     );
-    this.validate = recoil.selectorFamily({
-      key: [key, '$validate'].join('-'),
-      get: param => ({ get }) => {
-        return validateValueFamily({
-          fields: props.fields, get, param
-        });
-      },
-    });
     this.value = recoil.selectorFamily({
       key: [key, '$value'].join('-'),
       get: param => ({ get }) => {
@@ -94,7 +86,6 @@ export class ModelFamily<T, P extends SerializableParam> {
 };
 export class Model<T>  {
   fields: Fields<T>;
-  validate: RecoilValueReadOnly<ValidateInfo>;
   value: RecoilState<T>;
   constructor(props: ModelProps<T>) {
     const { key } = props;
@@ -106,15 +97,6 @@ export class Model<T>  {
       props.fields,
       fieldsArray,
     );
-    this.validate = recoil.selector({
-      key: [key, '$validate'].join('-'),
-      get: ({ get }) => {
-        const ddd = validateValue({
-          fields: props.fields, get
-        });;
-        return ddd
-      },
-    });
     this.value = recoil.selector({
       key: [key, '$value'].join('-'),
       get: ({ get }) => {
@@ -172,61 +154,6 @@ export const buildFields = <M>(props: M) => (
     }
   }
 };
-
-
-
-
-const validateValueArrayFamily = <T, P extends SerializableParam>(props: {
-  fields: FieldFamily<T, P> | FieldsFamily<T, P>, get: GetRecoilValue, param: P
-}): ValidateInfo[] => {
-  if (props.fields instanceof FieldFamily) {
-    return [props.get(props.fields.validate(props.param))]
-  } else {
-    let array: ValidateInfo[] = [];
-    for (const _key in props.fields) {
-      array = [...array, ...validateValueArrayFamily({
-        fields: props.fields[_key],
-        get: props.get,
-        param: props.param
-      })];
-    }
-    return array;
-  }
-};
-
-const validateValueTreeFamily = <T, P extends SerializableParam>(props: {
-  fields: FieldFamily<T, P> | FieldsFamily<T, P>, get: GetRecoilValue,
-  param: P
-}): ValidateInfoFields | ValidateInfo => {
-  if (props.fields instanceof FieldFamily) {
-    return props.get(props.fields.validate(props.param))
-  } else {
-    let obj: ValidateInfoFields = {};
-    for (const _key in props.fields) {
-      obj[_key] = validateValueTreeFamily({
-        fields: props.fields[_key],
-        get: props.get,
-        param: props.param
-      });
-    }
-    return obj;
-  }
-};
-const validateValueFamily = <T, P extends SerializableParam>(props: {
-  fields: FieldFamily<T, P> | FieldsFamily<T, P>, get: GetRecoilValue,
-  param: P
-}) => {
-  const validateFields = validateValueTreeFamily(props);
-  const lValidateValueArray = validateValueArrayFamily(props);
-  const messages = lValidateValueArray.flatMap((a) => a.messages).flatMap((e) => e);
-  return new ValidateInfoModel(
-    messages.length > 0 ? messages.join("\n") : null,
-    messages,
-    messages.length > 0,
-    validateFields as any,
-  )
-}
-
 
 
 
@@ -379,56 +306,5 @@ const resetValue = <T>(
     }
   }
 };
-
-
-
-
-const validateValueArray = <T>(props: {
-  fields: Field<T> | Fields<T>, get: GetRecoilValue
-}): ValidateInfo[] => {
-  if (props.fields instanceof Field) {
-    return [props.get(props.fields.validate)]
-  } else {
-    let array: ValidateInfo[] = [];
-    for (const _key in props.fields) {
-      array = [...array, ...validateValueArray({
-        fields: props.fields[_key],
-        get: props.get
-      })];
-    }
-    return array;
-  }
-};
-
-const validateValueTree = <T>(props: {
-  fields: Field<T> | Fields<T>, get: GetRecoilValue
-}): ValidateInfoFields | ValidateInfo => {
-  if (props.fields instanceof Field) {
-    return props.get(props.fields.validate)
-  } else {
-    let obj: ValidateInfoFields = {};
-    for (const _key in props.fields) {
-      obj[_key] = validateValueTree({
-        fields: props.fields[_key],
-        get: props.get
-      });
-    }
-    return obj;
-  }
-};
-const validateValue = <T>(props: {
-  fields: Field<T> | Fields<T>, get: GetRecoilValue,
-}) => {
-  const validateFields = validateValueTree(props);
-  const lValidateValueArray = validateValueArray(props);
-  const messages = lValidateValueArray.flatMap((a) => a.messages).flatMap((e) => e);
-  return new ValidateInfoModel(
-    messages.length > 0 ? messages.join("\n") : null,
-    messages,
-    messages.length > 0,
-    validateFields as any,
-  )
-}
-
 
 

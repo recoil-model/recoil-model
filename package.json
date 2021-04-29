@@ -14,17 +14,33 @@
     "native",
     "umd"
   ],
+  "keywords": [
+    "react",
+    "hooks",
+    "form",
+    "forms",
+    "form-validation",
+    "validation",
+    "typescript",
+    "react-hooks",
+    "recoil"
+  ],
   "repository": "https://github.com/recoil-model/recoil-model.git",
   "license": "MIT",
   "scripts": {
     "prepare": "install-peers",
     "build": "rollup -c && yarn tsc-dts",
-    "test": "jest",
     "format": "prettier --write \"./**/*.{js,md,json}\"",
     "test:typescript": "dtslint typescript",
     "lint": "eslint .",
     "tsc-dts": "tsc --project  ./tsconfig.types.json",
-    "deploy-nightly": "yarn build && node scripts/deploy_nightly_build.js"
+    "deploy-nightly": "yarn build && node scripts/deploy_nightly_build.js",
+    "test": "jest --config ./scripts/jest/jest.config.js",
+    "test:coverage": "npm run test -- --coverage",
+    "test:watch": "npm run test -- --onlyChanged --watch",
+    "test:web": "TEST_ENV=web npm run test",
+    "test:server": "TEST_ENV=server npm run test",
+    "test:native": "TEST_ENV=native npm run test"
   },
   "dependencies": {},
   "peerDependencies": {
