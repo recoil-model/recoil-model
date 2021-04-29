@@ -22,9 +22,21 @@
  */
 
 import { snapshot_UNSTABLE } from 'recoil';
-import { model } from '..';
 import { field } from '../core/field';
+import { model } from '../core/model';
 describe('model-basic-test', () => {
+  const lModel = model({
+    key: 'model-basic',
+    fields: {
+      name: field({
+        default: '',
+      }),
+      email: field({
+        default: ""
+      })
+    },
+  }).build();
+
   const personModel = model({
     key: 'model-basic-test',
     fields: {
@@ -33,11 +45,10 @@ describe('model-basic-test', () => {
       }),
       email: field({
         default: ""
-      })
-
+      }),
     },
-  });
-  personModel.fields.email.value
+  }).build();
+
   test('model-basic-test', done => {
     snapshot_UNSTABLE(async ({ set, reset, getPromise }) => {
       set(personModel.value, {

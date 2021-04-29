@@ -36,7 +36,7 @@ describe('model-basic', () => {
         default: '',
       }),
     },
-  });
+  }).build();
   const id = "01";
   test('model-basic', done => {
     snapshot_UNSTABLE(async ({ set, reset, getPromise }) => {

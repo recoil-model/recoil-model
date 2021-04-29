@@ -31,12 +31,22 @@ import recoil from 'recoil';
 import { DefaultAndDefaultFamilyProps, DefaultAndDefaultProps } from './defaultProps';
 
 
+export abstract class AbstractField<T> {
+  public value!: RecoilState<T>;
+  public abstract build(key: string, nodeField: string[]): void
+}
+export abstract class AbstractFieldFamily<T, P extends SerializableParam> {
+  public value!: (param: P) => RecoilState<T>;
+  public abstract build(key: string, nodeField: string[]): void
+}
+
+
 
 
 type FieldProps<T> = DefaultAndDefaultProps<T>
 
 type FieldFamilyProps<T, P extends SerializableParam> = DefaultAndDefaultFamilyProps<T, P>
-export class FieldFamily<T, P extends SerializableParam> {
+export class FieldFamily<T, P extends SerializableParam> extends AbstractFieldFamily<T, P> {
   public value!: (param: P) => RecoilState<T>
   public build(key: string, nodeField: string[]) {
     const { value } = this.FnBuild(key, nodeField)
@@ -48,9 +58,11 @@ export class FieldFamily<T, P extends SerializableParam> {
         value: (param: P) => RecoilState<T>
       }
     }) {
+    super();
   }
 }
-export class Field<T> {
+
+export class Field<T> extends AbstractField<T> {
   public value!: RecoilState<T>
   public build(key: string, nodeField: string[]) {
     const { value } = this.FnBuild(key, nodeField)
@@ -62,6 +74,7 @@ export class Field<T> {
         value: RecoilState<T>
       }
     }) {
+    super();
   }
 }
 

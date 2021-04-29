@@ -21,53 +21,65 @@
  *   SOFTWARE.
  */
 
-import recoil, { DefaultValue, GetRecoilValue, RecoilState, RecoilValue, RecoilValueReadOnly, ResetRecoilState, SerializableParam, SetRecoilState } from 'recoil';
-import { Field, FieldFamily } from './field';
+import recoil, { DefaultValue, GetRecoilValue, RecoilState, ResetRecoilState, SerializableParam, SetRecoilState } from 'recoil';
+
+import { AbstractField, AbstractFieldFamily, } from './field';
 import { NodeKey } from './nodeKey';
 
-import { DefaultFamilyProps, DefaultProps } from './defaultProps';
+type Fields = {
+  [key: string]: Fields
+} | AbstractField<any>
 
-export type FieldsFamily<T, P extends SerializableParam> = {
-  [k in keyof T]:
-  T[k] extends any[] ? FieldFamily<T[k], P> :
-  T[k] extends { [key: string]: any } ? FieldsFamily<T[k], P> : FieldFamily<T[k], P>
+type ExtFields<IFields> = {
+  [K in keyof IFields]: IFields[K] extends AbstractField<infer T> ? T : ExtFields<IFields[K]>
+}
 
+
+type ExtFieldsFamily<IFields> = {
+  [K in keyof IFields]: IFields[K] extends AbstractFieldFamily<infer T, any> ? T : ExtFieldsFamily<IFields[K]>
 }
-export type Fields<T> = {
-  [k in keyof T]:
-  T[k] extends any[] ? Field<T[k]> :
-  T[k] extends { [key: string]: any } ? Fields<T[k]> : Field<T[k]>
-}
-type ModelFamilyProps<T, P extends SerializableParam> = {
-  fields: FieldsFamily<T, P>;
+
+
+
+
+
+
+type FieldsFamily<P extends SerializableParam> = {
+  [key: string]: FieldsFamily<P>
+} | AbstractFieldFamily<any, any>
+type ModelFamilyProps<TFieldsFamily> = {
+  fields: TFieldsFamily;
   key: NodeKey
-} & Partial<DefaultFamilyProps<T, P>>
-type ModelProps<T> = { fields: Fields<T>; key: NodeKey } & Partial<DefaultProps<T>>;
+}
+type ModelProps<TFields> = { fields: TFields; key: NodeKey }
 type FieldsArray = ({
-  item: Field<any> | FieldFamily<any, any>,
+  item: AbstractField<any> | AbstractFieldFamily<any, any>,
   nodeField: string[]
 })[]
 
-export class ModelFamily<T, P extends SerializableParam> {
-  fields: FieldsFamily<T, P>;
-  value: (param: P) => RecoilState<T>;
-
-
-  constructor(props: ModelFamilyProps<T, P>) {
+export class ModelFamily<T, P extends SerializableParam, TFieldsFamily extends FieldsFamily<P>> {
+  fields: TFieldsFamily;
+  key!: string;
+  value!: (p: P) => RecoilState<T>;
+  constructor(props: ModelFamilyProps<TFieldsFamily>) {
     const { key } = props;
-    const fieldsArray: FieldsArray = [];
+    this.key = key;
     this.fields = props.fields;
-    buildFields(props)(
+  }
+  build() {
+    const { key, fields } = this;
+    const fieldsArray: FieldsArray = [];
+    buildFields(this)(
       [key, '$fields'].join('-'),
       [],
-      props.fields,
+      fields,
       fieldsArray,
     );
     this.value = recoil.selectorFamily({
       key: [key, '$value'].join('-'),
       get: param => ({ get }) => {
         return getValueFamily({
-          fields: props.fields,
+          fields: fields,
           param,
           get
         });
@@ -75,7 +87,7 @@ export class ModelFamily<T, P extends SerializableParam> {
       set: param => ({ set, reset }, value) => {
         return setValueFamily({
           param,
-          fields: props.fields,
+          fields: fields,
           set,
           reset,
           value
@@ -84,30 +96,39 @@ export class ModelFamily<T, P extends SerializableParam> {
     });
   }
 };
-export class Model<T>  {
-  fields: Fields<T>;
-  value: RecoilState<T>;
-  constructor(props: ModelProps<T>) {
+
+
+export class Model<T, TFields extends Fields>  {
+  fields: TFields;
+  key!: string;
+  value!: RecoilState<T>;
+  constructor(props: ModelProps<TFields>) {
+
     const { key } = props;
-    const fieldsArray: FieldsArray = [];
     this.fields = props.fields;
-    buildFields(props)(
+    this.key = key;
+  }
+
+  build() {
+    const { key, fields } = this;
+    const fieldsArray: FieldsArray = [];
+    buildFields(this)(
       [key, '$fields'].join('-'),
       [],
-      props.fields,
+      fields,
       fieldsArray,
     );
-    this.value = recoil.selector({
+    this.value = recoil.selector<T>({
       key: [key, '$value'].join('-'),
       get: ({ get }) => {
         return getValue({
-          fields: props.fields,
+          fields: fields,
           get
         });
       },
       set: ({ set, reset }, value) => {
         return setValue({
-          fields: props.fields,
+          fields: fields,
           set,
           reset,
           value
@@ -115,29 +136,63 @@ export class Model<T>  {
       },
     });
   }
+}
+
+type ModelFamilyBuild = {
+  <P extends SerializableParam, TFieldsFamily extends FieldsFamily<P>>(props: {
+    fields: TFieldsFamily,
+    key: string
+  }): {
+    build: <T extends ExtFieldsFamily<TFieldsFamily> = ExtFieldsFamily<TFieldsFamily>, P1 extends P = P>() => ModelFamily<T, P1, TFieldsFamily>
+  }
+}
+type ModelBuild = {
+  <TFields extends Fields>(props: {
+    fields: TFields,
+    key: string
+  }): {
+    build: <T extends ExtFields<TFields> = ExtFields<TFields>>() => Model<T, TFields>
+  }
+}
+
+
+
+export const modelFamily: ModelFamilyBuild = ({
+  fields,
+  key
+}) => {
+
+  const m = new ModelFamily<any, any, any>({
+    fields,
+    key
+  });
+  return {
+    build: () => {
+      m.build();
+      return m;
+    }
+  }
 };
 
 
+export const model: ModelBuild = (props) => {
 
-
-
-export const modelFamily = <T, P extends SerializableParam>(
-  props: ModelFamilyProps<T, P>): ModelFamily<T, P> => {
-  return new ModelFamily<T, P>(props);
+  const m = new Model<any, any>(props);
+  return {
+    build: () => {
+      m.build();
+      return m;
+    }
+  }
 };
-export const model = <T>(
-  props: ModelProps<T>): Model<T> => {
-  return new Model<T>(props);
-};
-
 
 export const buildFields = <M>(props: M) => (
   key: string,
   nodeField: string[],
-  fields: Fields<any> | FieldsFamily<any, any> | Field<any> | FieldFamily<any, any>,
+  fields: Fields | FieldsFamily<any> | AbstractField<any> | AbstractFieldFamily<any, any>,
   itens: FieldsArray,
 ): void => {
-  if (fields instanceof FieldFamily || fields instanceof Field) {
+  if (fields instanceof AbstractField || fields instanceof AbstractFieldFamily) {
     fields.build([key, ...nodeField].join('-'), nodeField);
     itens.push({
       item: fields,
@@ -163,14 +218,14 @@ export const buildFields = <M>(props: M) => (
 
 
 
-const getValueFamily = <T, P extends SerializableParam>(
+const getValueFamily = (
   props: {
-    fields: FieldFamily<T, P> | FieldsFamily<T, P>, get: GetRecoilValue,
-    param: P
-  }): T => {
+    fields: FieldsFamily<any>, get: GetRecoilValue,
+    param: SerializableParam
+  }): any => {
 
   const { fields, get, param } = props;
-  if (fields instanceof FieldFamily) {
+  if (fields instanceof AbstractFieldFamily) {
     return get(fields.value(param));
   } else {
     const obj: any = {};
@@ -185,13 +240,13 @@ const getValueFamily = <T, P extends SerializableParam>(
   }
 };
 
-const getValue = <T>(
+const getValue = <TFields>(
   props: {
-    fields: Field<T> | Fields<T>, get: GetRecoilValue
-  }): T => {
+    fields: AbstractField<TFields> | TFields, get: GetRecoilValue
+  }): any => {
 
   const { fields, get } = props;
-  if (fields instanceof Field) {
+  if (fields instanceof AbstractField) {
     return get(fields.value);
   } else {
     const obj: any = {};
@@ -207,15 +262,15 @@ const getValue = <T>(
 
 
 
-const setValueFamily = <T, P extends SerializableParam>(
+const setValueFamily = (
   props: {
-    fields: FieldFamily<T, P> | FieldsFamily<T, P>, set: SetRecoilState,
-    param: P,
+    fields: FieldsFamily<any>, set: SetRecoilState,
+    param: SerializableParam,
     value: any | DefaultValue, reset: ResetRecoilState,
 
   }): void => {
   const { fields, set, param, value, reset } = props;
-  if (fields instanceof FieldFamily) {
+  if (fields instanceof AbstractFieldFamily) {
     set(fields.value(param), value);
   } else {
     for (const _key in fields) {
@@ -238,15 +293,15 @@ const setValueFamily = <T, P extends SerializableParam>(
 };
 
 
-const resetValueFamily = <T, P extends SerializableParam>(
+const resetValueFamily = (
   props: {
-    fields: FieldFamily<T, P> | FieldsFamily<T, P>
-    param: P,
+    fields: FieldsFamily<any>
+    param: SerializableParam,
     reset: ResetRecoilState,
 
   }): void => {
   const { fields, param, reset } = props;
-  if (fields instanceof FieldFamily) {
+  if (fields instanceof AbstractFieldFamily) {
     reset(fields.value(param));
   } else {
     for (const _key in fields) {
@@ -259,14 +314,14 @@ const resetValueFamily = <T, P extends SerializableParam>(
   }
 };
 
-const setValue = <T>(
+const setValue = (
   props: {
-    fields: Field<T> | Fields<T>, set: SetRecoilState,
+    fields: Fields, set: SetRecoilState,
     value: any | DefaultValue, reset: ResetRecoilState,
 
   }): void => {
   const { fields, set, value, reset } = props;
-  if (fields instanceof Field) {
+  if (fields instanceof AbstractField) {
     set(fields.value, value);
   } else {
     for (const _key in fields) {
@@ -288,14 +343,14 @@ const setValue = <T>(
 };
 
 
-const resetValue = <T>(
+const resetValue = (
   props: {
-    fields: Field<T> | Fields<T>
+    fields: Fields
     reset: ResetRecoilState,
 
   }): void => {
   const { fields, reset } = props;
-  if (fields instanceof Field) {
+  if (fields instanceof AbstractField) {
     reset(fields.value);
   } else {
     for (const _key in fields) {
